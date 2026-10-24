@@ -14,7 +14,7 @@ import {
   WifiOff,
 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { usePageTitle } from '../i18n/usePageTitle';
+import { useSeo } from '../i18n/useSeo';
 import { PageHeader } from '../components/ui/PageHeader';
 import { SectionHeading } from '../components/ui/SectionHeading';
 import { Button } from '../components/ui/Button';
@@ -129,7 +129,7 @@ const groups: readonly FeatureGroup[] = [
 
 export const FeaturesPage: React.FC = () => {
   const { t } = useLanguage();
-  usePageTitle('seo.page.features');
+  useSeo('seo.page.features', 'seo.desc.features');
 
   return (
     <>

@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { GithubIcon } from '../components/icons/GithubIcon';
 import { AlertTriangle, ListChecks, Mail, MessageCircle } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { usePageTitle } from '../i18n/usePageTitle';
+import { useSeo } from '../i18n/useSeo';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Button } from '../components/ui/Button';
 import { SupportForm } from '../components/sections/SupportForm';
@@ -35,7 +35,7 @@ const supportFaq = [
 
 export const SupportPage: React.FC = () => {
   const { t } = useLanguage();
-  usePageTitle('seo.page.support');
+  useSeo('seo.page.support', 'seo.desc.support');
 
   const channels = [
     {

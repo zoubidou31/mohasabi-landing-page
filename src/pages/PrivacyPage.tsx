@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, HardDrive, MessageCircle, Save, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, HardDrive, Inbox, MessageCircle, Save, ShieldCheck } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { usePageTitle } from '../i18n/usePageTitle';
+import { useSeo } from '../i18n/useSeo';
 import { PageHeader } from '../components/ui/PageHeader';
 import { siteConfig } from '../config/siteConfig';
 import type { TranslationKey } from '../i18n/translations';
@@ -24,6 +24,11 @@ const sections = [
     bodyKey: 'privacy.contact.body',
   },
   {
+    icon: Inbox,
+    titleKey: 'privacy.forms.title',
+    bodyKey: 'privacy.forms.body',
+  },
+  {
     icon: Save,
     titleKey: 'privacy.backup.title',
     bodyKey: 'privacy.backup.body',
@@ -36,7 +41,7 @@ const sections = [
 
 export const PrivacyPage: React.FC = () => {
   const { t } = useLanguage();
-  usePageTitle('seo.page.privacy');
+  useSeo('seo.page.privacy', 'seo.desc.privacy');
 
   return (
     <>

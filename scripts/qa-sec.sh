@@ -125,4 +125,4 @@ check "logout" '{"ok":true}' "$(curl -s --max-time 15 -X POST -H "$O" -H "$J" -H
 
 echo
 echo "RESULT pass=$pass fail=$fail"
-echo "QA rows remain in the local database ($EMAIL, $SUP_EMAIL) and rate_limits holds the login attempts."
+echo "QA rows remain in the target database ($EMAIL, $SUP_EMAIL) and rate_limits holds the login attempts."

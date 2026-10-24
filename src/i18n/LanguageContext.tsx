@@ -12,9 +12,18 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+const readUrlLocale = (): Locale | null => {
+  if (typeof window === 'undefined') return null;
+  const value = new URLSearchParams(window.location.search).get('lang');
+  return value && locales.includes(value as Locale) ? (value as Locale) : null;
+};
+
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [locale, setLocaleState] = useState<Locale>(() => {
     if (typeof window !== 'undefined') {
+      // A shared `?lang=fr` link must win over this browser's stored choice.
+      const fromUrl = readUrlLocale();
+      if (fromUrl) return fromUrl;
       const saved = localStorage.getItem('mohasabi-locale') as Locale | null;
       if (saved && locales.includes(saved)) {
         return saved;
@@ -33,16 +42,21 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
       localStorage.setItem('mohasabi-locale', newLocale);
       document.documentElement.lang = newLocale;
       document.documentElement.dir = isRTL(newLocale) ? 'rtl' : 'ltr';
+      const url = new URL(window.location.href);
+      url.searchParams.set('lang', newLocale);
+      window.history.replaceState(
+        window.history.state,
+        '',
+        `${url.pathname}${url.search}${url.hash}`,
+      );
     }
   }, []);
 
   useEffect(() => {
     document.documentElement.lang = locale;
     document.documentElement.dir = isRTL(locale) ? 'rtl' : 'ltr';
-    const description = document.querySelector('meta[name="description"]');
-    if (description) {
-      description.setAttribute('content', getTranslation(locale, 'seo.description'));
-    }
+    // Per-page metadata (including the description) is owned by useSeo;
+    // overwriting it here would replace the page copy with the generic one.
   }, [locale]);
 
   const t = useCallback((key: TranslationKey) => {

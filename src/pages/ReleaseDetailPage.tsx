@@ -2,7 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import { AlertTriangle, ArrowLeft, Check, Download, Copy } from 'lucide-react';
 import { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { usePageTitle } from '../i18n/usePageTitle';
+import { useSeo } from '../i18n/useSeo';
 import { Button } from '../components/ui/Button';
 import { releases, formatBytes } from '../content/releases';
 
@@ -28,7 +28,11 @@ export const ReleaseDetailPage: React.FC = () => {
   const { t, locale } = useLanguage();
   const [copied, setCopied] = useState(false);
   const release = releases.find((entry) => entry.version === version);
-  usePageTitle('seo.page.whatsNew');
+  useSeo(
+    'seo.page.whatsNew',
+    'seo.desc.whatsNew',
+    release ? `Mohasabi ${release.version} — ${t('seo.page.whatsNew')}` : undefined,
+  );
 
   if (!release) {
     return (

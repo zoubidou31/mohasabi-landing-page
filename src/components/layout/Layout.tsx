@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { PageFallback } from '../ui/PageFallback';
 import { Header } from './Header';
 import { Footer } from './Footer';
 
@@ -34,7 +35,9 @@ export const Layout: React.FC = () => {
       </a>
       <Header />
       <main id="main-content" className="pt-16">
-        <Outlet />
+        <Suspense fallback={<PageFallback />}>
+          <Outlet />
+        </Suspense>
       </main>
       <Footer />
     </div>

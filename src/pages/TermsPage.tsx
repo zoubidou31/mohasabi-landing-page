@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Scale } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { usePageTitle } from '../i18n/usePageTitle';
+import { useSeo } from '../i18n/useSeo';
 import { PageHeader } from '../components/ui/PageHeader';
 import { siteConfig } from '../config/siteConfig';
 import type { TranslationKey } from '../i18n/translations';
@@ -20,7 +20,7 @@ const sections: readonly { id: string; titleKey: TranslationKey; bodyKey: Transl
 
 export const TermsPage: React.FC = () => {
   const { t } = useLanguage();
-  usePageTitle('seo.page.terms');
+  useSeo('seo.page.terms', 'seo.desc.terms');
 
   return (
     <>
@@ -53,7 +53,7 @@ export const TermsPage: React.FC = () => {
                 </article>
               ))}
 
-              <div className="bg-white rounded-card border border-neutral-200 p-6 md:p-7 shadow-[var(--shadow-card)]">
+              <div id="contact" className="bg-white rounded-card border border-neutral-200 p-6 md:p-7 shadow-[var(--shadow-card)]">
                 <h2 id="terms-contact-title" className="font-semibold text-neutral-900 mb-2.5">
                   {t('terms.contact.title')}
                 </h2>

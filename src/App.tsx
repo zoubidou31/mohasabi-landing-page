@@ -1,18 +1,25 @@
+import { lazy } from 'react';
 import { MotionConfig } from 'framer-motion';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { Layout } from './components/layout/Layout';
-import { HomePage } from './pages/HomePage';
-import { FeaturesPage } from './pages/FeaturesPage';
-import { GuidePage } from './pages/GuidePage';
-import { PricingPage } from './pages/PricingPage';
-import { SupportPage } from './pages/SupportPage';
-import { ReviewsPage } from './pages/ReviewsPage';
-import { WhatsNewPage } from './pages/WhatsNewPage';
-import { ReleaseDetailPage } from './pages/ReleaseDetailPage';
-import { PrivacyPage } from './pages/PrivacyPage';
-import { TermsPage } from './pages/TermsPage';
-import { AdminPage } from './pages/AdminPage';
+
+const HomePage = lazy(() => import('./pages/HomePage').then((module) => ({ default: module.HomePage })));
+const FeaturesPage = lazy(() => import('./pages/FeaturesPage').then((module) => ({ default: module.FeaturesPage })));
+const GuidePage = lazy(() => import('./pages/GuidePage').then((module) => ({ default: module.GuidePage })));
+const PricingPage = lazy(() => import('./pages/PricingPage').then((module) => ({ default: module.PricingPage })));
+const SupportPage = lazy(() => import('./pages/SupportPage').then((module) => ({ default: module.SupportPage })));
+const ReviewsPage = lazy(() => import('./pages/ReviewsPage').then((module) => ({ default: module.ReviewsPage })));
+const WhatsNewPage = lazy(() => import('./pages/WhatsNewPage').then((module) => ({ default: module.WhatsNewPage })));
+const ReleaseDetailPage = lazy(() =>
+  import('./pages/ReleaseDetailPage').then((module) => ({ default: module.ReleaseDetailPage })),
+);
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then((module) => ({ default: module.PrivacyPage })));
+const TermsPage = lazy(() => import('./pages/TermsPage').then((module) => ({ default: module.TermsPage })));
+const NotFoundPage = lazy(() =>
+  import('./pages/NotFoundPage').then((module) => ({ default: module.NotFoundPage })),
+);
+const AdminPage = lazy(() => import('./pages/AdminPage').then((module) => ({ default: module.AdminPage })));
 
 function App() {
   return (
@@ -32,7 +39,7 @@ function App() {
               <Route path="privacy" element={<PrivacyPage />} />
               <Route path="terms" element={<TermsPage />} />
               <Route path="admin" element={<AdminPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Routes>
         </BrowserRouter>

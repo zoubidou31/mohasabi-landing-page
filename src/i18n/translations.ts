@@ -33,6 +33,8 @@ export type TranslationKey =
   | 'screenshots.badge'
   | 'screenshots.title'
   | 'screenshots.subtitle'
+  | 'screenshots.pendingTitle'
+  | 'screenshots.pendingSubtitle'
   | 'screenshots.zoomHint'
   | 'screenshots.closeAria'
   | 'screenshots.prevAria'
@@ -271,6 +273,8 @@ export type TranslationKey =
   | 'privacy.site.body'
   | 'privacy.contact.title'
   | 'privacy.contact.body'
+  | 'privacy.forms.title'
+  | 'privacy.forms.body'
   | 'privacy.backup.title'
   | 'privacy.backup.body'
   | 'seo.ogTitle'
@@ -288,6 +292,20 @@ export type TranslationKey =
   | 'seo.page.whatsNew'
   | 'seo.page.reviews'
   | 'seo.page.terms'
+  | 'seo.desc.home'
+  | 'seo.desc.features'
+  | 'seo.desc.guide'
+  | 'seo.desc.pricing'
+  | 'seo.desc.support'
+  | 'seo.desc.reviews'
+  | 'seo.desc.whatsNew'
+  | 'seo.desc.privacy'
+  | 'seo.desc.terms'
+  | 'notFound.title'
+  | 'notFound.body'
+  | 'notFound.home'
+  | 'notFound.support'
+  | 'common.loading'
   | 'featuresPage.badge'
   | 'featuresPage.title'
   | 'featuresPage.subtitle'
@@ -530,6 +548,30 @@ export const translations: Record<Locale, Record<TranslationKey, string>> = {
     'seo.page.whatsNew': 'آخر التحديثات — Mohasabi',
     'seo.page.reviews': 'آراء المستخدمين — Mohasabi',
     'seo.page.terms': 'الشروط والأحكام — Mohasabi',
+    'seo.desc.home':
+      'Mohasabi برنامج محاسبة وفواتير مكتبي لنظام Windows: فواتير وعروض أسعار وزبائن وموردون ومخزون، مع عمل محلي وثلاث لغات.',
+    'seo.desc.features':
+      'تعرّف على قدرات Mohasabi المنشورة فعليًا: المستندات، والزبائن والموردون، والمخزون، والتقارير، واللغات الثلاث.',
+    'seo.desc.guide':
+      'خطوات تنزيل Mohasabi v1.0.3 والتحقق من الملف وتثبيته على Windows، مع توضيح تحذير SmartScreen والتحقق من SHA-256.',
+    'seo.desc.pricing':
+      'أسعار تراخيص Mohasabi بالدينار الجزائري: Standard وPro وEnterprise لفترات شهر و3 و6 و12 شهرًا، والطلب عبر واتساب أو البريد.',
+    'seo.desc.support':
+      'تواصل مع دعم Mohasabi عبر واتساب أو البريد، وأرسل تفاصيل مشكلتك دون مشاركة كلمات المرور أو بيانات العملاء.',
+    'seo.desc.reviews':
+      'آراء مستخدمي Mohasabi المنشورة بعد المراجعة، ونموذج لإرسال تجربتك دون عرض بريدك الإلكتروني علنًا.',
+    'seo.desc.whatsNew':
+      'سجل إصدارات Mohasabi المنشورة على GitHub Releases، مع ملاحظات الإصدار وحجم الملف وبصمة SHA-256.',
+    'seo.desc.privacy':
+      'سياسة خصوصية موقع Mohasabi: البيانات المرسلة عبر نماذج الدعم والتقييمات، وأين تُخزَّن، وكيف تطلب حذفها.',
+    'seo.desc.terms':
+      'شروط استخدام موقع Mohasabi وتراخيص البرنامج: النطاق، والتحديثات، والملكية، والمسؤولية.',
+    'notFound.title': 'الصفحة غير موجودة — Mohasabi',
+    'notFound.body':
+      'الرابط الذي فتحته غير موجود أو تغيّر. يمكنك العودة إلى الصفحة الرئيسية أو التواصل مع الدعم.',
+    'notFound.home': 'العودة إلى الرئيسية',
+    'notFound.support': 'الدعم والتواصل',
+    'common.loading': 'جارٍ التحميل…',
     'featuresPage.badge': 'المميزات',
     'featuresPage.title': 'قدرات Mohasabi في الإصدار المنشور',
     'featuresPage.subtitle': 'كل ما يلي متاح فعلًا في نسخة Windows المنشورة، بلا ميزات تجريبية ولا وعود لم تُنفَّذ.',
@@ -638,12 +680,12 @@ export const translations: Record<Locale, Record<TranslationKey, string>> = {
     'reviews.rule1.label': 'مراجعة بشرية.',
     'reviews.rule1.body': 'يبقى كل رأي غير منشور حتى يوافق عليه المدير.',
     'reviews.rule2.label': 'بريد غير منشور.',
-    'reviews.rule2.body': 'نستخدم بريدك للتحقق من التجربة وإعلامك عند النشر فقط.',
+    'reviews.rule2.body': 'يُستخدم بريدك لمنع التكرار والرجوع إليك بشأن المراجعة فقط، ولا يظهر للعامة.',
     'reviews.rule3.label': 'تجربة حقيقية.',
     'reviews.rule3.body': 'الآراء الدعائية أو المكررة أو مجهولة المصدر تُرفض.',
     'reviews.privacyLink': 'كيف نتعامل مع بياناتك؟',
     'reviews.emailLabel': 'بريدك الإلكتروني',
-    'reviews.emailHint': 'للتحقق ولإعلامك عند نشر الرأي، ولا يظهر للعامة.',
+    'reviews.emailHint': 'لمنع التكرار والتواصل بشأن المراجعة، ولا يظهر للعامة.',
     'reviews.nameLabel': 'الاسم المعروض (اختياري)',
     'reviews.namePlaceholder': 'اسمك أو اسم نشاطك',
     'reviews.nameHint': 'هذا ما يراه الزوار؛ اتركه فارغًا ليظهر «Mohasabi».',
@@ -796,6 +838,8 @@ export const translations: Record<Locale, Record<TranslationKey, string>> = {
     'screenshots.badge': 'لقطات الشاشة',
     'screenshots.title': 'شاهد Mohasabi كما هو',
     'screenshots.subtitle': 'استكشف واجهة البرنامج الفعلية وتعرّف على طريقة عرض المعلومات وإدارة أعمالك اليومية.',
+    'screenshots.pendingTitle': 'لقطات الشاشة غير متوفرة بعد',
+    'screenshots.pendingSubtitle': 'لا نعرض على هذا الموقع صورًا لواجهة غير حقيقية.',
     'screenshots.zoomHint': 'اضغط على أي لقطة لتكبيرها • التنقل بلوحة المفاتيح متاح',
     'screenshots.closeAria': 'إغلاق العارض',
     'screenshots.prevAria': 'اللقطة السابقة',
@@ -874,7 +918,7 @@ export const translations: Record<Locale, Record<TranslationKey, string>> = {
     'challenges.b3.desc': 'استخدم البرنامج محليًا حتى عند انقطاع الإنترنت.',
     'screenshots.closing': 'صور من البرنامج الحقيقي، حتى تتعرّف على الواجهة قبل تنزيله.',
     'screenshots.pending':
-      'نجهّز لقطات شاشة حقيقية من الإصدار المنشور، مع إخفاء أسماء الزبائن وبياناتهم. إلى ذلك الحين، يشرح دليل الاستخدام طريقة العمل خطوة بخطوة.',
+      'لم تُضف بعد لقطات حقيقية من الإصدار المنشور. إلى أن تتوفر، يشرح دليل الاستخدام طريقة العمل خطوة بخطوة.',
     'how.title': 'ابدأ في ثلاث خطوات',
     'how.step1.title': 'نزّل البرنامج',
     'how.step1.desc': 'نزّل ملف تثبيت Mohasabi المتوافق مع Windows 10 أو Windows 11 بنسخة 64-bit.',
@@ -943,13 +987,16 @@ export const translations: Record<Locale, Record<TranslationKey, string>> = {
       'يخزّن Mohasabi بيانات الفواتير والزبائن والمنتجات محليًا على الحاسوب الذي تستخدمه، ضمن ملفات البرنامج ومجلد البيانات الذي تحدده. لا تُرفع إلى خادم ولا تُرسل إلى جهة خارجية.',
     'privacy.site.title': 'هذا الموقع لا يتتبعك',
     'privacy.site.body':
-      'صفحات التعريف والأسعار والدليل ثابتة تمامًا: لا تحليلات، ولا ملفات تعريف إعلانية، ولا نوافذ تتبع، ولا خادم يطّلع على ما تكتبه. لا نطلب بريدك ولا رقمك للاطلاع على المحتوى.',
+      'صفحات التعريف والأسعار والدليل ثابتة: لا تحليلات، ولا ملفات تعريف إعلانية، ولا نوافذ تتبع. لا نطلب بريدك ولا رقمك للاطلاع على المحتوى. أما النماذج التي ترسلها بنفسك فهي موضحة أدناه.',
     'privacy.contact.title': 'عندما تتواصل معنا',
     'privacy.contact.body':
       'تفتح أزرار WhatsApp والبريد رسالة على جهازك بما اخترته من خطة أو مدة أو نوع طلب. نطّلع فقط على ما ترسله بنفسك، ونستخدمه للرد على استفسارك أو طلب الترخيص.',
+    'privacy.forms.title': 'نماذج الدعم والتقييمات',
+    'privacy.forms.body':
+      'عند إرسال نموذج الدعم نستلم الاسم والبريد ونوع الطلب ورقم الإصدار والرسالة؛ وعند إرسال تقييم نستلم البريد والاسم المعروض والتقييم والعنوان والنص. تُخزَّن هذه البيانات في قاعدة بيانات الموقع، ولا يطّلع عليها إلا مدير الموقع، ويُستخدم البريد لمنع التكرار والرجوع إليك بشأن الطلب. بعد الموافقة يُعرض نص التقييم والاسم المعروض فقط، ولا يُعرض البريد علنًا. لا توجد مدة حذف تلقائي محددة حاليًا، ويمكنك طلب حذف بياناتك عبر قناة الدعم.',
     'privacy.backup.title': 'النسخ الاحتياطي مسؤوليتك',
     'privacy.backup.body':
-      'البرنامج ينشئ نسخًا احتياطية على جهازك، لكن فقدان البيانات يتبع تلف القرص أو حذف المجلد أو تسرّب الحاسوب. احتفظ بنسخة منفصلة خارج الجهاز وتحقّق من استعادتها.',
+      'تُحفظ بياناتك محليًا على جهازك. قد ينتج فقدان البيانات عن تلف القرص أو حذف المجلد أو اختراق الحاسوب، لذلك احتفظ بنسخة منفصلة خارج الجهاز وتحقّق من استعادتها.',
     'seo.ogTitle': 'Mohasabi — نظّم أعمالك من مكان واحد',
     'seo.ogDescription':
       'تعرّف على Mohasabi، ونظّم الفواتير والزبائن والموردين والمخزون من خلال برنامج مكتبي لنظام Windows.',
@@ -1075,6 +1122,30 @@ export const translations: Record<Locale, Record<TranslationKey, string>> = {
     'seo.page.whatsNew': 'Nouveautés — Mohasabi',
     'seo.page.reviews': 'Avis des utilisateurs — Mohasabi',
     'seo.page.terms': 'Conditions générales — Mohasabi',
+    'seo.desc.home':
+      'Mohasabi, logiciel de comptabilité et de facturation pour Windows : factures, devis, clients, fournisseurs et stock, en local et en trois langues.',
+    'seo.desc.features':
+      'Découvrez les fonctions réellement livrées dans Mohasabi : documents, clients et fournisseurs, stock, rapports et trois langues.',
+    'seo.desc.guide':
+      'Téléchargez Mohasabi v1.0.3, vérifiez le fichier, installez-le sous Windows et comprenez l’avertissement SmartScreen et l’empreinte SHA-256.',
+    'seo.desc.pricing':
+      'Tarifs des licences Mohasabi en dinars algériens : Standard, Pro et Enterprise, pour 1, 3, 6 ou 12 mois, commande par WhatsApp ou e-mail.',
+    'seo.desc.support':
+      'Contactez l’assistance Mohasabi par WhatsApp ou e-mail et décrivez votre problème sans envoyer de mots de passe ni de données clients.',
+    'seo.desc.reviews':
+      'Avis publiés des utilisateurs de Mohasabi après modération, et formulaire pour partager votre expérience sans afficher votre e-mail.',
+    'seo.desc.whatsNew':
+      'Historique des versions publiées de Mohasabi sur GitHub Releases : notes, taille du fichier et empreinte SHA-256.',
+    'seo.desc.privacy':
+      'Politique de confidentialité du site Mohasabi : données envoyées via les formulaires, où elles sont stockées et comment demander leur suppression.',
+    'seo.desc.terms':
+      'Conditions d’utilisation du site Mohasabi et des licences du logiciel : périmètre, mises à jour, propriété et responsabilité.',
+    'notFound.title': 'Page introuvable — Mohasabi',
+    'notFound.body':
+      'Le lien demandé n’existe pas ou a changé. Revenez à l’accueil ou contactez l’assistance.',
+    'notFound.home': 'Retour à l’accueil',
+    'notFound.support': 'Assistance',
+    'common.loading': 'Chargement…',
     'featuresPage.badge': 'Fonctionnalités',
     'featuresPage.title': 'Les capacités réellement livrées dans la version publiée',
     'featuresPage.subtitle': 'Tout ce qui suit est disponible dans la version Windows publiée, sans fonctionnalité bêta ni promesse non tenue.',
@@ -1183,12 +1254,12 @@ export const translations: Record<Locale, Record<TranslationKey, string>> = {
     'reviews.rule1.label': 'Revue humaine.',
     'reviews.rule1.body': 'Chaque avis reste privé jusqu’à validation par l’administrateur.',
     'reviews.rule2.label': 'Email non publié.',
-    'reviews.rule2.body': 'Votre email sert uniquement à vérifier l’expérience et à vous prévenir de la publication.',
+    'reviews.rule2.body': 'Votre e-mail sert uniquement à éviter les doublons et à vous recontacter au sujet de l’avis ; il n’est jamais publié.',
     'reviews.rule3.label': 'Usage réel.',
     'reviews.rule3.body': 'Les avis promotionnels, en double ou anonymes sont refusés.',
     'reviews.privacyLink': 'Comment vos données sont traitées ?',
     'reviews.emailLabel': 'Votre email',
-    'reviews.emailHint': 'Pour la vérification et la notification de publication, jamais publié.',
+    'reviews.emailHint': 'Pour éviter les doublons et vous recontacter au sujet de l’avis ; jamais publié.',
     'reviews.nameLabel': 'Nom affiché (facultatif)',
     'reviews.namePlaceholder': 'Votre nom ou votre activité',
     'reviews.nameHint': 'C’est ce que verront les visiteurs ; laissez vide pour afficher « Mohasabi ».',
@@ -1342,6 +1413,8 @@ export const translations: Record<Locale, Record<TranslationKey, string>> = {
     'screenshots.badge': 'Captures d\'écran',
     'screenshots.title': 'Découvrez Mohasabi tel qu\'il est',
     'screenshots.subtitle': 'Explorez l\'interface réelle et voyez comment les informations sont présentées.',
+    'screenshots.pendingTitle': 'Captures d\'écran pas encore disponibles',
+    'screenshots.pendingSubtitle': 'Ce site n\'affiche aucune image d\'interface qui n\'existe pas.',
     'screenshots.zoomHint': 'Cliquez sur une capture pour l\'agrandir • Navigation au clavier disponible',
     'screenshots.closeAria': 'Fermer la visionneuse',
     'screenshots.prevAria': 'Capture précédente',
@@ -1423,7 +1496,7 @@ export const translations: Record<Locale, Record<TranslationKey, string>> = {
     'challenges.b3.desc': 'Utilisez le logiciel en local même quand Internet est coupé.',
     'screenshots.closing': 'Des images du logiciel réel, pour découvrir l\'interface avant de le télécharger.',
     'screenshots.pending':
-      "Nous préparons de vraies captures d'écran de la version publiée, avec les noms et données des clients masqués. En attendant, le mode d'emploi explique chaque étape.",
+      "Aucune capture réelle de la version publiée n'a encore été ajoutée. En attendant, le mode d'emploi explique chaque étape.",
     'how.title': 'Débutez en trois étapes',
     'how.step1.title': 'Téléchargez le programme',
     'how.step1.desc': 'Téléchargez le fichier d\'installation Mohasabi pour Windows 10 ou 11 en 64 bits.',
@@ -1494,13 +1567,16 @@ export const translations: Record<Locale, Record<TranslationKey, string>> = {
       'Mohasabi enregistre factures, clients et produits en local sur l\'ordinateur que vous utilisez, dans les fichiers du programme et le dossier de données choisi. Rien n\'est envoyé à un serveur ni à un tiers.',
     'privacy.site.title': 'Ce site ne vous suit pas',
     'privacy.site.body':
-      'Les pages de présentation, tarifs, guide et support sont entièrement statiques : aucune analyse d\'audience, aucun cookie publicitaire, aucun traqueur, et aucun serveur qui lit ce que vous écrivez. Nous ne demandons ni e-mail ni téléphone pour consulter le contenu.',
+      'Les pages de présentation, tarifs, guide et support sont statiques : aucune analyse d\'audience, aucun cookie publicitaire, aucun traqueur. Nous ne demandons ni e-mail ni téléphone pour consulter le contenu. Les formulaires que vous envoyez vous-même sont décrits ci-dessous.',
     'privacy.contact.title': 'Quand vous nous contactez',
     'privacy.contact.body':
       'Les boutons WhatsApp et e-mail ouvrent un message sur votre appareil, prérempli avec le plan, la durée ou le type de demande choisi. Nous ne prenons connaissance que de ce que vous envoyez vous-même, pour répondre à votre question ou à votre demande de licence.',
+    'privacy.forms.title': 'Formulaires d\'assistance et d\'avis',
+    'privacy.forms.body':
+      'Une demande d\'assistance nous transmet nom, e-mail, type de demande, version et message ; un avis nous transmet e-mail, nom affiché, note, titre et texte. Ces données sont stockées dans la base du site, accessibles uniquement à l\'administrateur, et l\'e-mail sert à éviter les doublons et à vous recontacter au sujet de la demande. Après validation, seuls le texte et le nom affiché sont publiés ; l\'e-mail n\'est jamais public. Aucune durée de suppression automatique n\'est définie à ce jour ; vous pouvez demander la suppression de vos données via le canal d\'assistance.',
     'privacy.backup.title': 'La sauvegarde vous revient',
     'privacy.backup.body':
-      'Le logiciel crée des sauvegardes sur votre machine, mais la perte de données suit un disque HS, un dossier supprimé ou un ordinateur compromis. Gardez une copie hors de l\'appareil et testez sa restauration.',
+      'Vos données sont conservées localement sur votre machine. Une perte peut venir d\'un disque défaillant, d\'un dossier supprimé ou d\'un ordinateur compromis : gardez une copie hors de l\'appareil et testez sa restauration.',
     'seo.ogTitle': 'Mohasabi — organisez votre activité depuis un seul endroit',
     'seo.ogDescription':
       'Découvrez Mohasabi et gérez factures, clients, fournisseurs et stock avec une application de bureau pour Windows.',
@@ -1626,6 +1702,30 @@ export const translations: Record<Locale, Record<TranslationKey, string>> = {
     'seo.page.whatsNew': 'What’s new — Mohasabi',
     'seo.page.reviews': 'User reviews — Mohasabi',
     'seo.page.terms': 'Terms & conditions — Mohasabi',
+    'seo.desc.home':
+      'Mohasabi is a Windows accounting and invoicing desktop app for invoices, quotes, customers, suppliers and stock, working locally in three languages.',
+    'seo.desc.features':
+      'See what Mohasabi actually ships: documents, customers and suppliers, inventory, reports and three interface languages.',
+    'seo.desc.guide':
+      'Download Mohasabi v1.0.3, verify the file, install it on Windows and understand the SmartScreen warning and SHA-256 check.',
+    'seo.desc.pricing':
+      'Mohasabi licence prices in Algerian dinars: Standard, Pro and Enterprise for 1, 3, 6 or 12 months, ordered via WhatsApp or email.',
+    'seo.desc.support':
+      'Contact Mohasabi support by WhatsApp or email and describe your issue without sending passwords or customer data.',
+    'seo.desc.reviews':
+      'Published Mohasabi user reviews after moderation, plus a form to share your experience without exposing your email.',
+    'seo.desc.whatsNew':
+      'Published Mohasabi releases on GitHub Releases, with release notes, file size and SHA-256 checksum.',
+    'seo.desc.privacy':
+      'Mohasabi website privacy policy: data sent through support and review forms, where it is stored, and how to request deletion.',
+    'seo.desc.terms':
+      'Terms for using the Mohasabi website and software licences: scope, updates, ownership and liability.',
+    'notFound.title': 'Page not found — Mohasabi',
+    'notFound.body':
+      'The link you followed does not exist or has changed. Return to the home page or contact support.',
+    'notFound.home': 'Back to home',
+    'notFound.support': 'Support',
+    'common.loading': 'Loading…',
     'featuresPage.badge': 'Features',
     'featuresPage.title': 'What the published release actually does',
     'featuresPage.subtitle': 'Everything below ships in the published Windows build — no beta features, no unkept promises.',
@@ -1734,12 +1834,12 @@ export const translations: Record<Locale, Record<TranslationKey, string>> = {
     'reviews.rule1.label': 'Human moderation.',
     'reviews.rule1.body': 'Every review stays unpublished until the administrator approves it.',
     'reviews.rule2.label': 'Email stays private.',
-    'reviews.rule2.body': 'Your email is only used to verify the experience and to notify you about publication.',
+    'reviews.rule2.body': 'Your email is used only to prevent duplicates and to contact you about the review; it is never published.',
     'reviews.rule3.label': 'Real usage.',
     'reviews.rule3.body': 'Promotional, duplicate or unverifiable reviews are rejected.',
     'reviews.privacyLink': 'How we handle your data?',
     'reviews.emailLabel': 'Your email',
-    'reviews.emailHint': 'Used for verification and publication notice, never displayed.',
+    'reviews.emailHint': 'Used to prevent duplicates and to contact you about the review; never displayed.',
     'reviews.nameLabel': 'Display name (optional)',
     'reviews.namePlaceholder': 'Your name or business',
     'reviews.nameHint': 'Visitors see this; leave it empty to show “Mohasabi”.',
@@ -1893,6 +1993,8 @@ export const translations: Record<Locale, Record<TranslationKey, string>> = {
     'screenshots.badge': 'Screenshots',
     'screenshots.title': 'See Mohasabi as it is',
     'screenshots.subtitle': 'Explore the real interface and how your daily information is presented.',
+    'screenshots.pendingTitle': 'Screenshots not available yet',
+    'screenshots.pendingSubtitle': 'This site does not show images of an interface that does not exist.',
     'screenshots.zoomHint': 'Click any screenshot to enlarge it • Keyboard navigation available',
     'screenshots.closeAria': 'Close viewer',
     'screenshots.prevAria': 'Previous screenshot',
@@ -1973,7 +2075,7 @@ export const translations: Record<Locale, Record<TranslationKey, string>> = {
     'challenges.b3.desc': 'Use the app locally even when the connection drops.',
     'screenshots.closing': 'Images from the real program, so you know the interface before downloading it.',
     'screenshots.pending':
-      'We are preparing real screenshots from the published release, with customer names and data hidden. Meanwhile, the how-to guide walks through each step.',
+      'No real screenshots from the published release have been added yet. Meanwhile, the how-to guide walks through each step.',
     'how.title': 'Start in three steps',
     'how.step1.title': 'Download the app',
     'how.step1.desc': 'Download the Mohasabi setup file for 64-bit Windows 10 or Windows 11.',
@@ -2043,13 +2145,16 @@ export const translations: Record<Locale, Record<TranslationKey, string>> = {
       'Mohasabi writes invoices, customers and products locally on the computer you use, inside the program files and the data folder you choose. Nothing is uploaded to a server or shared with a third party.',
     'privacy.site.title': 'This site does not track you',
     'privacy.site.body':
-      'The marketing, pricing, guide and support pages are fully static: no analytics, no advertising cookies, no trackers, and no server reading what you type. We never ask for your e-mail or phone number to show the content.',
+      'The marketing, pricing, guide and support pages are static: no analytics, no advertising cookies, no trackers. We never ask for your e-mail or phone number to show the content. Forms you submit yourself are described below.',
     'privacy.contact.title': 'When you contact us',
     'privacy.contact.body':
       'The WhatsApp and e-mail buttons open a message on your device, pre-filled with the plan, duration or request type you picked. We only see what you choose to send, and use it to answer your question or licence request.',
+    'privacy.forms.title': 'Support and review forms',
+    'privacy.forms.body':
+      'A support request gives us your name, e-mail, request type, version and message; a review gives us your e-mail, display name, rating, title and text. This data is stored in the site database and readable only by the administrator; the e-mail is used to prevent duplicates and to contact you about the request. After approval only the review text and display name are published; the e-mail is never public. No automatic deletion period is set today; you can ask for your data to be deleted through the support channel.',
     'privacy.backup.title': 'Backups remain your responsibility',
     'privacy.backup.body':
-      'The program creates backups on your machine, but data loss follows a failed disk, a deleted folder or a compromised computer. Keep a copy outside the device and check that it restores.',
+      'Your data is stored locally on your machine. Loss can follow a failed disk, a deleted folder or a compromised computer, so keep a copy outside the device and check that it restores.',
     'seo.ogTitle': 'Mohasabi — run your business from one place',
     'seo.ogDescription':
       'Meet Mohasabi and manage invoices, customers, suppliers and stock with a desktop app for Windows.',

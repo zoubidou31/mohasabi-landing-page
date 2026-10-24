@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, CalendarDays, Download, FileCheck2, ShieldCheck } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { usePageTitle } from '../i18n/usePageTitle';
+import { useSeo } from '../i18n/useSeo';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Button } from '../components/ui/Button';
 import { releases, formatBytes, type ReleaseRecord } from '../content/releases';
@@ -78,7 +78,7 @@ export const ReleaseCard: React.FC<{ release: ReleaseRecord; detailLabel: string
 
 export const WhatsNewPage: React.FC = () => {
   const { t } = useLanguage();
-  usePageTitle('seo.page.whatsNew');
+  useSeo('seo.page.whatsNew', 'seo.desc.whatsNew');
   const [latest] = releases;
 
   return (

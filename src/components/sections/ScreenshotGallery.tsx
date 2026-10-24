@@ -62,9 +62,9 @@ export const ScreenshotGallery: React.FC = () => {
               id="screenshots-title"
               className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4 leading-tight"
             >
-              {t('screenshots.title')}
+              {t('screenshots.pendingTitle')}
             </h2>
-            <p className="text-lg text-neutral-600 max-w-2xl mx-auto">{t('screenshots.subtitle')}</p>
+            <p className="text-lg text-neutral-600 max-w-2xl mx-auto">{t('screenshots.pendingSubtitle')}</p>
           </header>
 
           <div className="max-w-2xl mx-auto rounded-2xl border border-neutral-200 bg-white p-6 md:p-7 flex flex-col sm:flex-row items-start gap-5">

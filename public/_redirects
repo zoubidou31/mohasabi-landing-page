@@ -1,1 +1,6 @@
-/* /index.html 200
+# Cloudflare Pages serves every emitted `<route>.html` at its extensionless
+# path natively (HTML handling), so no rewrite rules are needed for the page
+# shells. Rewriting them here caused self-redirects in the emulator and sent
+# /admin to /. Anything without a matching shell falls through to 404.html
+# and keeps a real 404 status.
+/admin/ /admin 301

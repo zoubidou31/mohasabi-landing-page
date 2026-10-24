@@ -53,6 +53,8 @@ export const AdminPage: React.FC = () => {
 
   useEffect(() => {
     document.title = t('admin.title');
+    // the prerendered admin shell already carries this directive
+    if (document.head.querySelector('meta[name="robots"]')) return;
     const meta = document.createElement('meta');
     meta.name = 'robots';
     meta.content = 'noindex, nofollow';

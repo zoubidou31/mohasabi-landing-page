@@ -14,7 +14,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { usePageTitle } from '../i18n/usePageTitle';
+import { useSeo } from '../i18n/useSeo';
 import { PageHeader } from '../components/ui/PageHeader';
 import { SectionHeading } from '../components/ui/SectionHeading';
 import { Button } from '../components/ui/Button';
@@ -64,7 +64,7 @@ const smartChecks: readonly TranslationKey[] = [
 
 export const GuidePage: React.FC = () => {
   const { t } = useLanguage();
-  usePageTitle('seo.page.guide');
+  useSeo('seo.page.guide', 'seo.desc.guide');
   const download = getDownloadState();
   const isReady = download.status === 'ready';
 

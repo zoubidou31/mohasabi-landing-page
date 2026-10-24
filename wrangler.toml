@@ -1,15 +1,30 @@
-name = "mohasabi-landing-page"
+name = "mohasabi"
 compatibility_date = "2026-10-24"
 pages_build_output_dir = "./dist"
 
-# D1 binding used by every Pages Function under ./functions.
-# After `npx wrangler d1 create mohasabi-cms`, paste the returned id below and
-# deploy. Local `wrangler pages dev` keeps its own copy under .wrangler/.
+# Top-level configuration = PRODUCTION project `mohasabi`.
+# It is intentionally left as a placeholder: the owner must create the real
+# production D1 and paste its id before any production deployment. It must
+# never point at the preview database below.
+#   npx wrangler d1 create mohasabi-cms
 [[d1_databases]]
 binding = "DB"
 database_name = "mohasabi-cms"
 database_id = "00000000-0000-0000-0000-000000000000"
 
-# Secrets are never stored in this file:
-#   npx wrangler pages secret put ADMIN_PASSWORD
-#   npx wrangler pages secret put SESSION_SECRET
+# Preview configuration = separate project `mohasabi-preview` with its own D1.
+# Cloudflare Pages applies this section only when the branch differs from the
+# project's production branch, so always deploy the preview with:
+#   npm run deploy:preview   (= --project-name mohasabi-preview --branch preview)
+# Deploying that project on its production branch would fall back to the
+# top-level (production) binding, which is why the script pins the branch.
+[env.preview]
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "mohasabi-cms-preview"
+database_id = "9d6590b6-7ac0-4dd5-a3b0-62321db906f4"
+
+# Secrets are never stored in this file. Per project:
+#   npx wrangler pages secret put ADMIN_PASSWORD --project-name mohasabi-preview
+#   npx wrangler pages secret put SESSION_SECRET --project-name mohasabi-preview
+# (use --project-name mohasabi only with the owner's explicit approval)
