@@ -1,0 +1,15 @@
+name = "mohasabi-landing-page"
+compatibility_date = "2026-10-24"
+pages_build_output_dir = "./dist"
+
+# D1 binding used by every Pages Function under ./functions.
+# After `npx wrangler d1 create mohasabi-cms`, paste the returned id below and
+# deploy. Local `wrangler pages dev` keeps its own copy under .wrangler/.
+[[d1_databases]]
+binding = "DB"
+database_name = "mohasabi-cms"
+database_id = "00000000-0000-0000-0000-000000000000"
+
+# Secrets are never stored in this file:
+#   npx wrangler pages secret put ADMIN_PASSWORD
+#   npx wrangler pages secret put SESSION_SECRET

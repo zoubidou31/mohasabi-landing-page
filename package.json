@@ -5,9 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && tsc -p tsconfig.functions.json && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "dev:api": "wrangler pages dev dist",
+    "db:local": "wrangler d1 execute mohasabi-cms --local --file=./db/schema.sql",
+    "db:remote": "wrangler d1 execute mohasabi-cms --remote --file=./db/schema.sql"
   },
   "dependencies": {
     "framer-motion": "^14.6.0",
@@ -17,6 +20,7 @@
     "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261024.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^24.19.2",
     "@types/react": "^19.3.0",
@@ -27,6 +31,7 @@
     "postcss": "^8.5.31",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.3",
-    "vite": "^8.3.4"
+    "vite": "^8.3.4",
+    "wrangler": "^4.152.0"
   }
 }

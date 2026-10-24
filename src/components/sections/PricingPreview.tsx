@@ -2,11 +2,8 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { ArrowRight } from 'lucide-react';
-import {
-  buildPlanWhatsAppUrl,
-  formatAmount,
-  siteConfig,
-} from '../../config/siteConfig';
+import { usePricingPlans } from '../../hooks/usePricingPlans';
+import { buildPlanWhatsAppUrl, formatAmount } from '../../config/siteConfig';
 import type { PlanId } from '../../config/siteConfig';
 import type { TranslationKey } from '../../i18n/translations';
 
@@ -18,7 +15,7 @@ const tags: Record<PlanId, TranslationKey> = {
 
 export const PricingPreview: React.FC = () => {
   const { t } = useLanguage();
-  const { plans } = siteConfig.pricing;
+  const plans = usePricingPlans();
   const currency = t('pricing.currency');
 
   return (
