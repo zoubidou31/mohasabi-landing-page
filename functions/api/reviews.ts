@@ -1,102 +1,116 @@
-import type { Env, ReviewRow } from '../_lib/types';
-import { clientKey, fail, isEmail, json, methodNotAllowed, readJson, text } from '../_lib/http';
-import { hashKey } from '../_lib/crypto';
-import { logActivity, newId, nowIso, withinLimit } from '../_lib/db';
+import {
+  Env,
+  checkOrigin,
+  checkRateLimit,
+  errorResponse,
+  getClientIp,
+  jsonResponse,
+} from './_shared';
 
-const REVIEW_IP_LIMIT = 5;
-const REVIEW_IP_WINDOW_SECONDS = 60 * 60;
-const REVIEW_EMAIL_LIMIT = 3;
-const REVIEW_EMAIL_WINDOW_SECONDS = 24 * 60 * 60;
-const DUPLICATE_WINDOW_MS = 24 * 60 * 60 * 1000;
-
-type PublicRow = Pick<ReviewRow, 'id' | 'display_name' | 'rating' | 'title' | 'body' | 'published_at'>;
-
-async function listApproved(env: Env): Promise<Response> {
-  const { results } = await env.DB.prepare(
-    `SELECT id, display_name, rating, title, body, published_at
-       FROM reviews
-      WHERE status = 'approved' AND published_at IS NOT NULL
-      ORDER BY published_at DESC
-      LIMIT 50`,
-  ).all<PublicRow>();
-
-  return json({
-    reviews: results.map((row) => ({
-      id: row.id,
-      displayName: row.display_name,
-      rating: row.rating,
-      title: row.title,
-      body: row.body,
-      publishedAt: row.published_at,
-    })),
-  });
+interface PublicReview {
+  id: string;
+  displayName: string;
+  rating: number;
+  title: string;
+  body: string;
+  publishedAt: string;
 }
 
-async function submit(env: Env, request: Request): Promise<Response> {
-  const body = await readJson(request);
-  if (!body) return fail('invalid', 400);
-
-  // Off-screen honeypot: a filled field is treated as a bot and dropped quietly.
-  if (text(body.website, 100).length > 0) return json({ status: 'pending' });
-
-  const email = text(body.email, 160).toLowerCase();
-  const displayName = text(body.displayName, 40) || 'Mohasabi';
-  const rating = Number(body.rating);
-  const title = text(body.title, 80);
-  const reviewBody = text(body.body, 1200);
-  const consent = body.consent === true;
-
-  if (
-    !isEmail(email) ||
-    !Number.isInteger(rating) ||
-    rating < 1 ||
-    rating > 5 ||
-    title.length < 3 ||
-    reviewBody.length < 15 ||
-    !consent
-  ) {
-    return fail('invalid', 400);
+export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
+  if (!env.DB) {
+    return errorResponse('unavailable', 'Database not configured', 503);
   }
 
-  const salt = env.SESSION_SECRET ?? 'mohasabi-rate-limit';
-  const ipHash = await hashKey(salt, `ip:${clientKey(request)}`);
-  const emailHash = await hashKey(salt, `email:${email}`);
+  try {
+    const { results } = await env.DB.prepare(
+      `SELECT id, display_name as displayName, rating, title, body, created_at as publishedAt
+       FROM reviews
+       WHERE status = 'approved'
+       ORDER BY created_at DESC
+       LIMIT 100`
+    ).all<PublicReview>();
 
-  const ipAllowed = await withinLimit(
-    env,
-    `review:ip:${ipHash}`,
-    REVIEW_IP_LIMIT,
-    REVIEW_IP_WINDOW_SECONDS,
-  );
-  const emailAllowed = await withinLimit(
-    env,
-    `review:email:${emailHash}`,
-    REVIEW_EMAIL_LIMIT,
-    REVIEW_EMAIL_WINDOW_SECONDS,
-  );
-  if (!ipAllowed || !emailAllowed) return fail('rate_limited', 429);
+    return jsonResponse({ reviews: results || [] });
+  } catch (err) {
+    console.error('Error fetching reviews:', err);
+    return errorResponse('unknown', 'Failed to retrieve reviews', 500);
+  }
+};
 
-  const duplicate = await env.DB.prepare(
-    'SELECT id FROM reviews WHERE email = ?1 AND body = ?2 AND created_at >= ?3 LIMIT 1',
-  )
-    .bind(email, reviewBody, new Date(Date.now() - DUPLICATE_WINDOW_MS).toISOString())
-    .first<{ id: string }>();
-  if (duplicate) return fail('duplicate', 409);
+export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+  if (!checkOrigin(request)) {
+    return errorResponse('unauthorized', 'Cross-origin request blocked', 403);
+  }
 
-  const id = newId();
-  await env.DB.prepare(
-    `INSERT INTO reviews (id, email, display_name, rating, title, body, status, created_at, published_at)
-     VALUES (?1, ?2, ?3, ?4, ?5, ?6, 'pending', ?7, NULL)`,
-  )
-    .bind(id, email, displayName, rating, title, reviewBody, nowIso())
-    .run();
+  if (!env.DB) {
+    return errorResponse('unavailable', 'Database not configured', 503);
+  }
 
-  await logActivity(env, 'visitor', 'review.submitted', `review ${id}`);
-  return json({ status: 'pending' });
-}
+  const ip = getClientIp(request);
+  const allowed = await checkRateLimit(env.DB, `review:${ip}`, 5, 600);
+  if (!allowed) {
+    return errorResponse('rate_limited', 'Too many reviews submitted. Please try again later.', 429);
+  }
 
-export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
-  if (request.method === 'GET') return listApproved(env);
-  if (request.method === 'POST') return submit(env, request);
-  return methodNotAllowed(['GET', 'POST']);
+  let body: any;
+  try {
+    body = await request.json();
+  } catch {
+    return errorResponse('invalid', 'Invalid JSON payload', 400);
+  }
+
+  // Honeypot check for bots
+  if (body.website && String(body.website).trim().length > 0) {
+    return jsonResponse({ status: 'pending' });
+  }
+
+  const email = String(body.email || '').trim();
+  const displayName = String(body.displayName || '').trim();
+  const rating = Number(body.rating);
+  const title = String(body.title || '').trim();
+  const reviewBody = String(body.body || '').trim();
+  const consent = Boolean(body.consent);
+
+  // Validation
+  const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/;
+  if (!emailRegex.test(email) || email.length > 160) {
+    return errorResponse('invalid', 'Invalid email address', 400);
+  }
+  if (isNaN(rating) || rating < 1 || rating > 5) {
+    return errorResponse('invalid', 'Rating must be an integer between 1 and 5', 400);
+  }
+  if (title.length < 3 || title.length > 90) {
+    return errorResponse('invalid', 'Title must be between 3 and 90 characters', 400);
+  }
+  if (reviewBody.length < 15 || reviewBody.length > 1200) {
+    return errorResponse('invalid', 'Body must be between 15 and 1200 characters', 400);
+  }
+  if (!consent) {
+    return errorResponse('invalid', 'Consent is required', 400);
+  }
+
+  const id = crypto.randomUUID();
+  const now = new Date().toISOString();
+  const safeName = displayName || (email.split('@')[0] || 'User');
+
+  try {
+    // Check duplicate recent review from same email and title
+    const existing = await env.DB.prepare(
+      'SELECT id FROM reviews WHERE email = ? AND title = ? LIMIT 1'
+    ).bind(email, title).first();
+
+    if (existing) {
+      return errorResponse('duplicate', 'A review with this title already exists', 409);
+    }
+
+    await env.DB.prepare(
+      `INSERT INTO reviews (id, email, display_name, rating, title, body, status, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)`
+    ).bind(id, email, safeName, rating, title, reviewBody, now).run();
+
+    return jsonResponse({ status: 'pending' }, 201);
+  } catch (err) {
+    console.error('Error saving review:', err);
+    return errorResponse('unknown', 'Failed to submit review', 500);
+  }
 };

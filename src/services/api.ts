@@ -152,24 +152,6 @@ const hasSessionShape = (payload: unknown): boolean =>
 const hasQueuedShape = (payload: unknown): boolean =>
   typeof payload === 'object' && payload !== null && 'status' in payload;
 
-const isPricePlanRow = (value: unknown): value is PricingPlanRow => {
-  if (typeof value !== 'object' || value === null) return false;
-  const row = value as Record<string, unknown>;
-  return (
-    typeof row.id === 'string' &&
-    typeof row.name === 'string' &&
-    [row.month, row.quarter, row.halfYear, row.year].every(
-      (price) => typeof price === 'number' && Number.isInteger(price) && price > 0,
-    )
-  );
-};
-
-const hasPricingShape = (payload: unknown): boolean => {
-  if (typeof payload !== 'object' || payload === null) return false;
-  const plans = (payload as { plans?: unknown }).plans;
-  return Array.isArray(plans) && plans.every(isPricePlanRow);
-};
-
 export const api = {
   listReviews: () =>
     request<{ reviews: PublicReview[] }>('/api/reviews', undefined, hasReviewsArray),
@@ -186,13 +168,6 @@ export const api = {
       '/api/support',
       { method: 'POST', body: JSON.stringify(draft) },
       hasQueuedShape,
-    ),
-
-  pricing: () =>
-    request<{ currency: string; plans: PricingPlanRow[]; updatedAt: string | null }>(
-      '/api/pricing',
-      undefined,
-      hasPricingShape,
     ),
 
   session: () => request<{ admin: boolean; user: string }>('/api/session', undefined, hasSessionShape),

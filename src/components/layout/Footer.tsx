@@ -9,11 +9,10 @@ const currentYear = new Date().getFullYear();
 
 const pageLinks: ReadonlyArray<{ labelKey: TranslationKey; to: string }> = [
   { labelKey: 'footer.links.home', to: '/' },
-  { labelKey: 'footer.links.features', to: '/features' },
-  { labelKey: 'footer.links.guide', to: '/guide' },
   { labelKey: 'footer.links.pricing', to: '/pricing' },
-  { labelKey: 'footer.links.whatsNew', to: '/whats-new' },
+  { labelKey: 'footer.links.guide', to: '/installation' },
   { labelKey: 'footer.links.reviews', to: '/reviews' },
+  { labelKey: 'footer.links.whatsNew', to: '/updates' },
   { labelKey: 'footer.links.support', to: '/support' },
   { labelKey: 'footer.links.privacy', to: '/privacy' },
   { labelKey: 'footer.links.terms', to: '/terms' },
@@ -25,7 +24,7 @@ const sectionLinks: ReadonlyArray<{
   hash: string;
 }> = [
   { labelKey: 'footer.links.faq', to: '/', hash: '#faq' },
-  { labelKey: 'footer.links.requirements', to: '/guide', hash: '#requirements' },
+  { labelKey: 'footer.links.requirements', to: '/installation', hash: '#requirements' },
 ];
 
 const resourceLinks: ReadonlyArray<{
@@ -192,7 +191,7 @@ export const Footer: React.FC = () => {
               {t('footer.links.pricing')}
             </Link>
             <Link
-              to="/guide"
+              to="/installation"
               className="flex items-center gap-2 text-neutral-500 hover:text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded"
             >
               <FileText className="w-4 h-4" aria-hidden="true" />

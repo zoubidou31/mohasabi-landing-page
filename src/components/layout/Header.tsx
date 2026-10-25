@@ -15,11 +15,10 @@ interface NavItem {
 
 const navItems: readonly NavItem[] = [
   { key: 'nav.home', to: '/', end: true },
-  { key: 'nav.features', to: '/features' },
-  { key: 'nav.guide', to: '/guide' },
   { key: 'nav.pricing', to: '/pricing' },
-  { key: 'nav.whatsNew', to: '/whats-new' },
+  { key: 'nav.guide', to: '/installation' },
   { key: 'nav.reviews', to: '/reviews' },
+  { key: 'nav.whatsNew', to: '/updates' },
   { key: 'nav.support', to: '/support' },
 ];
 
@@ -42,10 +41,6 @@ export const Header: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [location.pathname]);
-
   const download = getDownloadState();
   const isReady = download.status === 'ready';
 
@@ -55,7 +50,7 @@ export const Header: React.FC = () => {
   };
 
   const linkClass = (active: boolean): string =>
-    `relative px-2.5 py-2 text-[13px] font-medium rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 ${
+    `relative px-3 py-2 text-sm font-medium rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 ${
       active ? 'text-primary' : 'text-neutral-600 hover:text-primary'
     }`;
 
@@ -73,7 +68,7 @@ export const Header: React.FC = () => {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-white/92 backdrop-blur-md border-b border-neutral-200/60'
+          ? 'bg-white/92 backdrop-blur-md border-b border-neutral-200/60 shadow-xs'
           : 'bg-transparent'
       }`}
       role="banner"
@@ -88,7 +83,8 @@ export const Header: React.FC = () => {
         <div className="flex items-center justify-between gap-4 h-16 md:h-18">
           <Link
             to="/"
-            className="flex items-center gap-2 shrink-0 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded-md"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="flex items-center gap-2.5 shrink-0 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded-md"
             aria-label={siteConfig.app.name}
           >
             <img
@@ -104,7 +100,7 @@ export const Header: React.FC = () => {
             </span>
           </Link>
 
-          <div className="hidden xl:flex items-center gap-1">
+          <div className="hidden lg:flex items-center gap-1">
             {navItems.map((item, index) => {
               const active = isItemActive(item);
               return (
@@ -121,7 +117,7 @@ export const Header: React.FC = () => {
                   >
                     {t(item.key)}
                     <span
-                      className={`absolute bottom-0 start-2.5 end-2.5 h-0.5 rounded-full bg-primary transition-opacity ${
+                      className={`absolute bottom-0 start-3 end-3 h-0.5 rounded-full bg-primary transition-opacity ${
                         active ? 'opacity-100' : 'opacity-0'
                       }`}
                       aria-hidden="true"
@@ -149,7 +145,7 @@ export const Header: React.FC = () => {
 
             <button
               type="button"
-              className="xl:hidden p-2 rounded-lg text-neutral-700 hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              className="lg:hidden p-2 rounded-lg text-neutral-700 hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-expanded={isMobileMenuOpen}
               aria-controls="mobile-menu"
@@ -164,14 +160,14 @@ export const Header: React.FC = () => {
           {isMobileMenuOpen && (
             <motion.div
               id="mobile-menu"
-              className="xl:hidden overflow-hidden"
+              className="lg:hidden overflow-hidden"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
             >
               <nav
-                className="flex flex-col gap-1 pt-4 pb-2 border-t border-neutral-200"
+                className="flex flex-col gap-1 pt-4 pb-3 border-t border-neutral-200"
                 aria-label={t('a11y.mobileNav')}
               >
                 {navItems.map((item) => (
@@ -187,7 +183,10 @@ export const Header: React.FC = () => {
                 ))}
                 <button
                   type="button"
-                  onClick={handleDownloadClick}
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    handleDownloadClick();
+                  }}
                   disabled={!isReady}
                   className={`mt-2 w-full px-5 py-3 ${downloadClass}`}
                   aria-label={t(isReady ? 'nav.download' : 'hero.downloadPendingBtn')}

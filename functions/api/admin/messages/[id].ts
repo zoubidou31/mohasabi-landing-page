@@ -1,21 +1,55 @@
-import type { Env } from '../../../_lib/types';
-import { fail, json, methodNotAllowed, readJson } from '../../../_lib/http';
-import { logActivity } from '../../../_lib/db';
+import {
+  Env,
+  authenticateRequest,
+  checkOrigin,
+  errorResponse,
+  jsonResponse,
+  recordAudit,
+} from '../../_shared';
 
-export const onRequest: PagesFunction<Env, 'id'> = async ({ request, env, params }) => {
-  if (request.method !== 'PATCH') return methodNotAllowed(['PATCH']);
+export const onRequestPatch: PagesFunction<Env> = async ({ request, env, params }) => {
+  if (!checkOrigin(request)) {
+    return errorResponse('unauthorized', 'Cross-origin request blocked', 403);
+  }
 
-  const id = typeof params.id === 'string' ? params.id : '';
-  if (id.length === 0 || id.length > 64) return fail('invalid', 400);
+  const { authenticated } = await authenticateRequest(request, env);
+  if (!authenticated) {
+    return errorResponse('unauthorized', 'Admin authentication required', 401);
+  }
 
-  const body = await readJson(request);
-  if (body?.read !== true) return fail('invalid', 400);
+  if (!env.DB) {
+    return errorResponse('unavailable', 'Database not configured', 503);
+  }
 
-  const result = await env.DB.prepare('UPDATE support_messages SET read = 1 WHERE id = ?1')
-    .bind(id)
-    .run();
-  if (result.meta.changes === 0) return fail('invalid', 400);
+  const id = String(params.id || '');
+  if (!id) {
+    return errorResponse('invalid', 'Message ID required', 400);
+  }
 
-  await logActivity(env, 'admin', 'support.read', `message ${id}`);
-  return json({ ok: true });
+  let body: any = {};
+  try {
+    body = await request.json();
+  } catch {
+    // empty body is fine if action is just mark read
+  }
+
+  const readVal = body.read === false ? 0 : 1;
+
+  try {
+    await env.DB.prepare('UPDATE support_messages SET read = ? WHERE id = ?')
+      .bind(readVal, id)
+      .run();
+
+    await recordAudit(
+      env.DB,
+      'admin',
+      readVal === 1 ? 'message_read' : 'message_unread',
+      `Support message ${id} marked as ${readVal === 1 ? 'read' : 'unread'}`
+    );
+
+    return jsonResponse({ ok: true, id, read: Boolean(readVal) });
+  } catch (err) {
+    console.error('Error updating message status:', err);
+    return errorResponse('unknown', 'Failed to update message', 500);
+  }
 };

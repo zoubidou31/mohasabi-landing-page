@@ -14,7 +14,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { useSeo } from '../i18n/useSeo';
+import { usePageTitle } from '../i18n/usePageTitle';
 import { PageHeader } from '../components/ui/PageHeader';
 import { SectionHeading } from '../components/ui/SectionHeading';
 import { Button } from '../components/ui/Button';
@@ -28,7 +28,6 @@ interface Step {
   descKey: TranslationKey;
 }
 
-// Ordered exactly as a real installation runs, so the numbers are meaningful.
 const steps: readonly Step[] = [
   { titleKey: 'guide.step.req.title', descKey: 'guide.step.req.desc' },
   { titleKey: 'guide.step1.title', descKey: 'guide.step1.desc' },
@@ -62,9 +61,9 @@ const smartChecks: readonly TranslationKey[] = [
   'guide.smart.check3',
 ];
 
-export const GuidePage: React.FC = () => {
+export const InstallationPage: React.FC = () => {
   const { t } = useLanguage();
-  useSeo('seo.page.guide', 'seo.desc.guide');
+  usePageTitle('seo.page.guide');
   const download = getDownloadState();
   const isReady = download.status === 'ready';
 
@@ -123,7 +122,7 @@ export const GuidePage: React.FC = () => {
               {siteConfig.release.version} · {siteConfig.release.setupAssetName}
             </span>
             <Link
-              to="/whats-new"
+              to="/updates"
               className="text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded"
             >
               {t('guide.smart.hashLink')}
@@ -182,7 +181,7 @@ export const GuidePage: React.FC = () => {
               <Button href={siteConfig.release.releasesUrl} target="_blank" variant="secondary">
                 {t('guide.smart.releasesCta')}
               </Button>
-              <Button to="/whats-new" variant="ghost">
+              <Button to="/updates" variant="ghost">
                 {t('guide.smart.hashLink')}
               </Button>
             </div>

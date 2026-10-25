@@ -62,9 +62,9 @@ export const ScreenshotGallery: React.FC = () => {
               id="screenshots-title"
               className="text-3xl md:text-4xl font-bold text-neutral-900 mb-4 leading-tight"
             >
-              {t('screenshots.pendingTitle')}
+              {t('screenshots.title')}
             </h2>
-            <p className="text-lg text-neutral-600 max-w-2xl mx-auto">{t('screenshots.pendingSubtitle')}</p>
+            <p className="text-lg text-neutral-600 max-w-2xl mx-auto">{t('screenshots.subtitle')}</p>
           </header>
 
           <div className="max-w-2xl mx-auto rounded-2xl border border-neutral-200 bg-white p-6 md:p-7 flex flex-col sm:flex-row items-start gap-5">
@@ -74,7 +74,7 @@ export const ScreenshotGallery: React.FC = () => {
             <div>
               <p className="text-neutral-600 leading-relaxed mb-4">{t('screenshots.pending')}</p>
               <Link
-                to="/guide"
+                to="/installation"
                 className="inline-flex items-center gap-2 text-primary font-medium hover:text-primary-dark transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded"
               >
                 <BookOpenText className="w-4 h-4" aria-hidden="true" />

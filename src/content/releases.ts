@@ -40,7 +40,7 @@ export const releases: readonly ReleaseRecord[] = [
     assetSizeBytes: 314248129,
     sha256: '37EF66E129173094D522761876DD94E4535EB776134E64D6A394AEB1AE3BCE05',
     downloadUrl:
-      'https://github.com/zoubidou31/mohasabi-releases/releases/download/v1.0.3/Mohasabi_Setup_v1.0.3.exe',
+      'https://github.com/zoubidou31/mohasabi-releases/releases/latest/download/Mohasabi_Setup_v1.0.3.exe',
     releaseUrl: `${RELEASES_BASE}/v1.0.3`,
     notes: {
       ar: {

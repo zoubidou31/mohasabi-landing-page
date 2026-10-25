@@ -69,7 +69,7 @@ export const HowItWorks: React.FC = () => {
                 </button>
               ) : (
                 <Link
-                  to="/guide"
+                  to="/installation"
                   className="self-start inline-flex items-center gap-2 text-primary font-medium hover:text-primary-dark transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded"
                 >
                   {t(step.ctaKey)}

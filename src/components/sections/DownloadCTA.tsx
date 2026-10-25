@@ -46,7 +46,7 @@ export const DownloadCTA: React.FC = () => {
           onClick={handleDownloadClick}
           disabled={!isReady}
           aria-describedby="cta-status-note"
-          className="inline-flex items-center justify-center gap-3 bg-white text-primary font-semibold px-10 py-4 rounded-xl hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2  transition-all duration-200 shadow-xl min-w-[280px] disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none"
+          className="inline-flex items-center justify-center gap-3 bg-white text-primary font-semibold px-10 py-4 rounded-xl hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2 transition-all duration-200 shadow-xl min-w-[280px] disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none"
         >
           <Download className="w-6 h-6" aria-hidden="true" />
           {t(isReady ? 'cta.downloadBtn' : 'hero.downloadPendingBtn')}
@@ -84,7 +84,7 @@ export const DownloadCTA: React.FC = () => {
             <>
               {t('cta.note')}{' '}
               <Link
-                to="/guide"
+                to="/installation"
                 className="underline font-medium focus-visible:outline-2 focus-visible:outline-white rounded"
               >
                 {t('nav.guide')}

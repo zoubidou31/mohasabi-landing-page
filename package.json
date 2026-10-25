@@ -5,16 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && tsc -p tsconfig.functions.json && vite build",
+    "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview",
-    "dev:api": "wrangler pages dev dist",
-    "db:local": "wrangler d1 execute mohasabi-cms --local --file=./db/schema.sql",
-    "db:remote": "wrangler d1 execute mohasabi-cms --remote --file=./db/schema.sql",
-    "db:remote:preview": "wrangler d1 execute mohasabi-cms-preview --remote --file=./db/schema.sql",
-    "deploy:preview": "wrangler pages deploy dist --project-name mohasabi-preview --branch preview",
-    "test": "vitest",
-    "test:run": "vitest run"
+    "test": "vitest run",
+    "test:run": "vitest run",
+    "qa:sec": "node scripts/qa-sec.js",
+    "preview": "vite preview"
   },
   "dependencies": {
     "framer-motion": "^14.6.0",
@@ -24,11 +20,7 @@
     "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20261024.1",
     "@tailwindcss/postcss": "^4.3.3",
-    "@testing-library/jest-dom": "^7.0.1",
-    "@testing-library/react": "^16.3.3",
-    "@testing-library/user-event": "^14.6.8",
     "@types/node": "^24.19.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
@@ -40,7 +32,6 @@
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.3",
     "vite": "^8.3.4",
-    "vitest": "^5.0.5",
-    "wrangler": "^4.152.0"
+    "vitest": "^5.0.5"
   }
 }

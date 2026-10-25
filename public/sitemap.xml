@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://mohasabi.pages.dev/</loc>
+    <lastmod>2026-10-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mohasabi.pages.dev/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mohasabi.pages.dev/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://mohasabi.pages.dev/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mohasabi.pages.dev/" />
+  </url>
+  <url>
+    <loc>https://mohasabi.pages.dev/pricing</loc>
+    <lastmod>2026-10-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mohasabi.pages.dev/pricing" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mohasabi.pages.dev/pricing" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://mohasabi.pages.dev/pricing" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mohasabi.pages.dev/pricing" />
+  </url>
+  <url>
+    <loc>https://mohasabi.pages.dev/installation</loc>
+    <lastmod>2026-10-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mohasabi.pages.dev/installation" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mohasabi.pages.dev/installation" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://mohasabi.pages.dev/installation" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mohasabi.pages.dev/installation" />
+  </url>
+  <url>
+    <loc>https://mohasabi.pages.dev/reviews</loc>
+    <lastmod>2026-10-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mohasabi.pages.dev/reviews" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mohasabi.pages.dev/reviews" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://mohasabi.pages.dev/reviews" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mohasabi.pages.dev/reviews" />
+  </url>
+  <url>
+    <loc>https://mohasabi.pages.dev/updates</loc>
+    <lastmod>2026-10-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mohasabi.pages.dev/updates" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mohasabi.pages.dev/updates" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://mohasabi.pages.dev/updates" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mohasabi.pages.dev/updates" />
+  </url>
+  <url>
+    <loc>https://mohasabi.pages.dev/support</loc>
+    <lastmod>2026-10-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mohasabi.pages.dev/support" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mohasabi.pages.dev/support" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://mohasabi.pages.dev/support" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mohasabi.pages.dev/support" />
+  </url>
+  <url>
+    <loc>https://mohasabi.pages.dev/privacy</loc>
+    <lastmod>2026-10-25</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mohasabi.pages.dev/privacy" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mohasabi.pages.dev/privacy" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://mohasabi.pages.dev/privacy" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mohasabi.pages.dev/privacy" />
+  </url>
+  <url>
+    <loc>https://mohasabi.pages.dev/terms</loc>
+    <lastmod>2026-10-25</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mohasabi.pages.dev/terms" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mohasabi.pages.dev/terms" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://mohasabi.pages.dev/terms" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mohasabi.pages.dev/terms" />
+  </url>
+</urlset>

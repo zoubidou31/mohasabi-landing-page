@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Activity,
   AlertTriangle,
@@ -40,21 +40,21 @@ export const AdminPage: React.FC = () => {
   const [gate, setGate] = useState<Gate>('checking');
   const [panel, setPanel] = useState<PanelId>('dashboard');
 
-  const checkSession = useCallback(async () => {
-    const result = await api.session();
-    if (result.kind === 'ok') setGate(result.data.admin ? 'admin' : 'anonymous');
-    else if (result.kind === 'unavailable') setGate('unavailable');
-    else setGate('anonymous');
+  useEffect(() => {
+    let active = true;
+    void api.session().then((result) => {
+      if (!active) return;
+      if (result.kind === 'ok') setGate(result.data.admin ? 'admin' : 'anonymous');
+      else if (result.kind === 'unavailable') setGate('unavailable');
+      else setGate('anonymous');
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
-    void checkSession();
-  }, [checkSession]);
-
-  useEffect(() => {
     document.title = t('admin.title');
-    // the prerendered admin shell already carries this directive
-    if (document.head.querySelector('meta[name="robots"]')) return;
     const meta = document.createElement('meta');
     meta.name = 'robots';
     meta.content = 'noindex, nofollow';
@@ -250,10 +250,15 @@ const DashboardPanel: React.FC = () => {
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
+    let active = true;
     void api.admin.stats().then((result) => {
+      if (!active) return;
       if (result.kind === 'ok') setStats(result.data);
       else setFailed(true);
     });
+    return () => {
+      active = false;
+    };
   }, []);
 
   if (failed) return <PanelShell title={t('admin.nav.dashboard')}><Unavailable /></PanelShell>;
@@ -295,17 +300,21 @@ const ReviewsPanel: React.FC = () => {
   const [failed, setFailed] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
 
-  const load = useCallback(async (next: 'pending' | 'approved' | 'rejected') => {
-    setFailed(false);
-    setReviews(null);
-    const result = await api.admin.reviews(next);
-    if (result.kind === 'ok') setReviews(result.data.reviews);
-    else setFailed(true);
-  }, []);
-
   useEffect(() => {
-    void load(status);
-  }, [status, load]);
+    let active = true;
+    void api.admin.reviews(status).then((result) => {
+      if (!active) return;
+      if (result.kind === 'ok') {
+        setReviews(result.data.reviews);
+        setFailed(false);
+      } else {
+        setFailed(true);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [status]);
 
   const decide = async (id: string, action: 'approve' | 'reject') => {
     setBusyId(id);
@@ -323,7 +332,10 @@ const ReviewsPanel: React.FC = () => {
             <button
               key={value}
               type="button"
-              onClick={() => setStatus(value)}
+              onClick={() => {
+                setStatus(value);
+                setReviews(null);
+              }}
               aria-pressed={status === value}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                 status === value ? 'bg-white text-neutral-900 shadow-[var(--shadow-card)]' : 'text-neutral-600'
@@ -389,10 +401,15 @@ const PricingPanel: React.FC = () => {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    let active = true;
     void api.admin.pricing().then((result) => {
+      if (!active) return;
       if (result.kind === 'ok') setRows(result.data.plans);
       else setFailed(true);
     });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const save = async () => {
@@ -511,10 +528,15 @@ const MessagesPanel: React.FC = () => {
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
+    let active = true;
     void api.admin.messages().then((result) => {
+      if (!active) return;
       if (result.kind === 'ok') setMessages(result.data.messages);
       else setFailed(true);
     });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const markRead = async (id: string) => {
@@ -574,10 +596,15 @@ const ActivityPanel: React.FC = () => {
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
+    let active = true;
     void api.admin.activity().then((result) => {
+      if (!active) return;
       if (result.kind === 'ok') setEntries(result.data.entries);
       else setFailed(true);
     });
+    return () => {
+      active = false;
+    };
   }, []);
 
   return (
@@ -611,3 +638,5 @@ const ActivityPanel: React.FC = () => {
     </PanelShell>
   );
 };
+
+export default AdminPage;

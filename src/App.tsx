@@ -1,25 +1,26 @@
-import { lazy } from 'react';
+import { lazy, Suspense } from 'react';
 import { MotionConfig } from 'framer-motion';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { Layout } from './components/layout/Layout';
+import { HomePage } from './pages/HomePage';
+import { Loader2 } from 'lucide-react';
 
-const HomePage = lazy(() => import('./pages/HomePage').then((module) => ({ default: module.HomePage })));
-const FeaturesPage = lazy(() => import('./pages/FeaturesPage').then((module) => ({ default: module.FeaturesPage })));
-const GuidePage = lazy(() => import('./pages/GuidePage').then((module) => ({ default: module.GuidePage })));
-const PricingPage = lazy(() => import('./pages/PricingPage').then((module) => ({ default: module.PricingPage })));
-const SupportPage = lazy(() => import('./pages/SupportPage').then((module) => ({ default: module.SupportPage })));
-const ReviewsPage = lazy(() => import('./pages/ReviewsPage').then((module) => ({ default: module.ReviewsPage })));
-const WhatsNewPage = lazy(() => import('./pages/WhatsNewPage').then((module) => ({ default: module.WhatsNewPage })));
-const ReleaseDetailPage = lazy(() =>
-  import('./pages/ReleaseDetailPage').then((module) => ({ default: module.ReleaseDetailPage })),
+const PricingPage = lazy(() => import('./pages/PricingPage').then((m) => ({ default: m.PricingPage })));
+const InstallationPage = lazy(() => import('./pages/InstallationPage').then((m) => ({ default: m.InstallationPage })));
+const SupportPage = lazy(() => import('./pages/SupportPage').then((m) => ({ default: m.SupportPage })));
+const ReviewsPage = lazy(() => import('./pages/ReviewsPage').then((m) => ({ default: m.ReviewsPage })));
+const UpdatesPage = lazy(() => import('./pages/UpdatesPage').then((m) => ({ default: m.UpdatesPage })));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then((m) => ({ default: m.PrivacyPage })));
+const TermsPage = lazy(() => import('./pages/TermsPage').then((m) => ({ default: m.TermsPage })));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
+
+const PageFallback = () => (
+  <div className="min-h-[50vh] flex items-center justify-center py-20" role="status">
+    <Loader2 className="w-8 h-8 animate-spin text-primary" aria-label="Loading page" />
+  </div>
 );
-const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then((module) => ({ default: module.PrivacyPage })));
-const TermsPage = lazy(() => import('./pages/TermsPage').then((module) => ({ default: module.TermsPage })));
-const NotFoundPage = lazy(() =>
-  import('./pages/NotFoundPage').then((module) => ({ default: module.NotFoundPage })),
-);
-const AdminPage = lazy(() => import('./pages/AdminPage').then((module) => ({ default: module.AdminPage })));
 
 function App() {
   return (
@@ -29,17 +30,87 @@ function App() {
           <Routes>
             <Route element={<Layout />}>
               <Route index element={<HomePage />} />
-              <Route path="features" element={<FeaturesPage />} />
-              <Route path="guide" element={<GuidePage />} />
-              <Route path="pricing" element={<PricingPage />} />
-              <Route path="support" element={<SupportPage />} />
-              <Route path="reviews" element={<ReviewsPage />} />
-              <Route path="whats-new" element={<WhatsNewPage />} />
-              <Route path="whats-new/:version" element={<ReleaseDetailPage />} />
-              <Route path="privacy" element={<PrivacyPage />} />
-              <Route path="terms" element={<TermsPage />} />
-              <Route path="admin" element={<AdminPage />} />
-              <Route path="*" element={<NotFoundPage />} />
+              <Route
+                path="pricing"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <PricingPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="installation"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <InstallationPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="support"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <SupportPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="reviews"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <ReviewsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="updates"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <UpdatesPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="privacy"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <PrivacyPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="terms"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <TermsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="admin"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <AdminPage />
+                  </Suspense>
+                }
+              />
+
+              {/* Backward compatibility redirects */}
+              <Route path="guide" element={<Navigate to="/installation" replace />} />
+              <Route path="whats-new" element={<Navigate to="/updates" replace />} />
+              <Route path="whats-new/:version" element={<Navigate to="/updates" replace />} />
+              <Route path="updates/:version" element={<Navigate to="/updates" replace />} />
+              <Route path="features" element={<Navigate to="/#features" replace />} />
+
+              {/* Dedicated accessible 404 page */}
+              <Route
+                path="*"
+                element={
+                  <Suspense fallback={<PageFallback />}>
+                    <NotFoundPage />
+                  </Suspense>
+                }
+              />
             </Route>
           </Routes>
         </BrowserRouter>

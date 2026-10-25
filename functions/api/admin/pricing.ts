@@ -1,11 +1,13 @@
-import type { Env, PricingRow } from '../../_lib/types';
-import { fail, json, methodNotAllowed, readJson, text } from '../../_lib/http';
-import { logActivity, newId, nowIso } from '../../_lib/db';
+import {
+  Env,
+  authenticateRequest,
+  checkOrigin,
+  errorResponse,
+  jsonResponse,
+  recordAudit,
+} from '../_shared';
 
-const PLAN_IDS = ['standard', 'pro', 'enterprise'] as const;
-const MAX_AMOUNT = 10_000_000;
-
-interface Draft {
+interface PlanPayload {
   id: string;
   name: string;
   month: number;
@@ -14,86 +16,107 @@ interface Draft {
   year: number;
 }
 
-function parseDraft(value: unknown): Draft | null {
-  if (typeof value !== 'object' || value === null) return null;
-  const row = value as Record<string, unknown>;
-  const id = typeof row.id === 'string' ? row.id : '';
-  const name = text(row.name, 40);
-  const amounts = [row.month, row.quarter, row.halfYear, row.year];
+export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
+  const { authenticated } = await authenticateRequest(request, env);
+  if (!authenticated) {
+    return errorResponse('unauthorized', 'Admin authentication required', 401);
+  }
 
-  if (!PLAN_IDS.includes(id as (typeof PLAN_IDS)[number]) || name.length === 0) return null;
+  if (!env.DB) {
+    return errorResponse('unavailable', 'Database not configured', 503);
+  }
 
-  const amountsAreValid = amounts.every(
-    (amount) => Number.isInteger(amount) && (amount as number) > 0 && (amount as number) <= MAX_AMOUNT,
-  );
-  if (!amountsAreValid) return null;
+  try {
+    const { results } = await env.DB.prepare(
+      `SELECT id, name, month, quarter, half_year as halfYear, year
+       FROM pricing_plans
+       ORDER BY CASE id
+         WHEN 'standard' THEN 1
+         WHEN 'pro' THEN 2
+         WHEN 'enterprise' THEN 3
+         ELSE 4
+       END`
+    ).all<PlanPayload>();
 
-  return {
-    id,
-    name,
-    month: amounts[0] as number,
-    quarter: amounts[1] as number,
-    halfYear: amounts[2] as number,
-    year: amounts[3] as number,
-  };
-}
+    const maxUpdated = await env.DB.prepare('SELECT MAX(updated_at) as updatedAt FROM pricing_plans').first<{ updatedAt: string | null }>();
 
-async function readPlans(env: Env): Promise<Response> {
-  const { results } = await env.DB.prepare(
-    'SELECT id, name, month, quarter, half_year, year, updated_at FROM pricing_plans ORDER BY month ASC',
-  ).all<PricingRow>();
+    return jsonResponse({
+      plans: results || [],
+      updatedAt: maxUpdated?.updatedAt ?? null,
+    });
+  } catch (err) {
+    console.error('Error fetching admin pricing:', err);
+    return errorResponse('unknown', 'Failed to retrieve pricing', 500);
+  }
+};
 
-  return json({
-    plans: results.map((row) => ({
-      id: row.id,
-      name: row.name,
-      month: row.month,
-      quarter: row.quarter,
-      halfYear: row.half_year,
-      year: row.year,
-    })),
-    updatedAt: results.reduce<string | null>(
-      (latest, row) => (latest === null || row.updated_at > latest ? row.updated_at : latest),
-      null,
-    ),
-  });
-}
+export const onRequestPut: PagesFunction<Env> = async ({ request, env }) => {
+  if (!checkOrigin(request)) {
+    return errorResponse('unauthorized', 'Cross-origin request blocked', 403);
+  }
 
-async function savePlans(env: Env, request: Request): Promise<Response> {
-  const body = await readJson(request);
-  if (!body || !Array.isArray(body.plans)) return fail('invalid', 400);
+  const { authenticated } = await authenticateRequest(request, env);
+  if (!authenticated) {
+    return errorResponse('unauthorized', 'Admin authentication required', 401);
+  }
 
-  const drafts = body.plans.map(parseDraft);
-  if (drafts.some((draft) => draft === null)) return fail('invalid', 400);
-  const plans = drafts as Draft[];
+  if (!env.DB) {
+    return errorResponse('unavailable', 'Database not configured', 503);
+  }
 
-  const ids = new Set(plans.map((plan) => plan.id));
-  if (ids.size !== PLAN_IDS.length || !PLAN_IDS.every((id) => ids.has(id))) return fail('invalid', 400);
+  let body: any;
+  try {
+    body = await request.json();
+  } catch {
+    return errorResponse('invalid', 'Invalid JSON payload', 400);
+  }
 
-  const at = nowIso();
-  await env.DB.batch(
-    plans.map((plan) =>
-      env.DB.prepare(
-        `UPDATE pricing_plans
-            SET name = ?2, month = ?3, quarter = ?4, half_year = ?5, year = ?6, updated_at = ?7
-          WHERE id = ?1`,
-      ).bind(plan.id, plan.name, plan.month, plan.quarter, plan.halfYear, plan.year, at),
-    ),
-  );
+  const plans = body.plans as PlanPayload[];
+  const note = String(body.note || '').trim();
 
-  const note = text(body.note, 300);
-  await env.DB.prepare(
-    'INSERT INTO pricing_changes (id, at, actor, note, snapshot) VALUES (?1, ?2, ?3, ?4, ?5)',
-  )
-    .bind(newId(), at, 'admin', note, JSON.stringify(plans))
-    .run();
-  await logActivity(env, 'admin', 'pricing.updated', note || 'table updated');
+  if (!Array.isArray(plans) || plans.length === 0) {
+    return errorResponse('invalid', 'Plans array is required', 400);
+  }
 
-  return json({ ok: true, updatedAt: at });
-}
+  for (const plan of plans) {
+    if (!plan.id || typeof plan.month !== 'number' || plan.month < 0 ||
+        typeof plan.quarter !== 'number' || plan.quarter < 0 ||
+        typeof plan.halfYear !== 'number' || plan.halfYear < 0 ||
+        typeof plan.year !== 'number' || plan.year < 0) {
+      return errorResponse('invalid', `Invalid price values for plan ${plan.id}`, 400);
+    }
+  }
 
-export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
-  if (request.method === 'GET') return readPlans(env);
-  if (request.method === 'PUT') return savePlans(env, request);
-  return methodNotAllowed(['GET', 'PUT']);
+  const now = new Date().toISOString();
+
+  try {
+    const stmts = plans.map((plan) =>
+      env.DB!.prepare(
+        `INSERT INTO pricing_plans (id, name, month, quarter, half_year, year, updated_at, note)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+         ON CONFLICT(id) DO UPDATE SET
+           name = excluded.name,
+           month = excluded.month,
+           quarter = excluded.quarter,
+           half_year = excluded.half_year,
+           year = excluded.year,
+           updated_at = excluded.updated_at,
+           note = excluded.note`
+      ).bind(plan.id, plan.name, plan.month, plan.quarter, plan.halfYear, plan.year, now, note)
+    );
+
+    await env.DB.batch(stmts);
+
+    await recordAudit(
+      env.DB,
+      'admin',
+      'pricing_updated',
+      `Updated ${plans.length} pricing plans. Note: ${note || 'None'}`
+    );
+
+    return jsonResponse({ ok: true, updatedAt: now });
+  } catch (err) {
+    console.error('Error updating pricing:', err);
+    return errorResponse('unknown', 'Failed to save pricing', 500);
+  }
 };

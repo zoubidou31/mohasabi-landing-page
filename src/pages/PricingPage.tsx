@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Banknote, ClipboardCheck, MessageCircle, ReceiptText } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { useSeo } from '../i18n/useSeo';
+import { usePageTitle } from '../i18n/usePageTitle';
 import { PageHeader } from '../components/ui/PageHeader';
 import { LicensePlans } from '../components/sections/LicensePlans';
 import { siteConfig } from '../config/siteConfig';
@@ -20,7 +20,7 @@ const notes = [
 
 export const PricingPage: React.FC = () => {
   const { t } = useLanguage();
-  useSeo('seo.page.pricing', 'seo.desc.pricing');
+  usePageTitle('seo.page.pricing');
 
   return (
     <>

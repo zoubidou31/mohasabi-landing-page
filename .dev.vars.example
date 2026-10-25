@@ -1,4 +1,0 @@
-# Local-only values for `npm run dev:api`. Never commit this file (.gitignore covers it).
-# Values here are throwaway placeholders for the local emulator, not production secrets.
-ADMIN_PASSWORD=local-dev-password-change-me
-SESSION_SECRET=local-dev-session-secret-change-me-min-32-chars

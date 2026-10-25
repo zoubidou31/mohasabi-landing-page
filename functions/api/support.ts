@@ -1,59 +1,69 @@
-import type { Env } from '../_lib/types';
-import { clientKey, fail, isEmail, json, methodNotAllowed, readJson, text } from '../_lib/http';
-import { hashKey } from '../_lib/crypto';
-import { logActivity, newId, nowIso, withinLimit } from '../_lib/db';
+import {
+  Env,
+  checkOrigin,
+  checkRateLimit,
+  errorResponse,
+  getClientIp,
+  jsonResponse,
+} from './_shared';
 
-const TOPICS = new Set(['install', 'activation', 'duration', 'renewal', 'purchase', 'other']);
-const SUPPORT_IP_LIMIT = 5;
-const SUPPORT_IP_WINDOW_SECONDS = 60 * 60;
-const DUPLICATE_WINDOW_MS = 60 * 60 * 1000;
-
-export const onRequest: PagesFunction<Env> = async ({ request, env }) => {
-  if (request.method !== 'POST') return methodNotAllowed(['POST']);
-
-  const body = await readJson(request);
-  if (!body) return fail('invalid', 400);
-
-  if (text(body.website, 100).length > 0) return json({ status: 'queued' });
-
-  const name = text(body.name, 80);
-  const email = text(body.email, 160).toLowerCase();
-  const topic = text(body.topic, 20);
-  const version = text(body.version, 20);
-  const message = text(body.message, 2000);
-
-  if (
-    name.length < 2 ||
-    !isEmail(email) ||
-    !TOPICS.has(topic) ||
-    message.length < 20
-  ) {
-    return fail('invalid', 400);
+export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+  if (!checkOrigin(request)) {
+    return errorResponse('unauthorized', 'Cross-origin request blocked', 403);
   }
 
-  const salt = env.SESSION_SECRET ?? 'mohasabi-rate-limit';
-  const ipHash = await hashKey(salt, `ip:${clientKey(request)}`);
-  if (
-    !(await withinLimit(env, `support:ip:${ipHash}`, SUPPORT_IP_LIMIT, SUPPORT_IP_WINDOW_SECONDS))
-  ) {
-    return fail('rate_limited', 429);
+  if (!env.DB) {
+    return errorResponse('unavailable', 'Database not configured', 503);
   }
 
-  const duplicate = await env.DB.prepare(
-    'SELECT id FROM support_messages WHERE email = ?1 AND message = ?2 AND created_at >= ?3 LIMIT 1',
-  )
-    .bind(email, message, new Date(Date.now() - DUPLICATE_WINDOW_MS).toISOString())
-    .first<{ id: string }>();
-  if (duplicate) return fail('duplicate', 409);
+  const ip = getClientIp(request);
+  const allowed = await checkRateLimit(env.DB, `support:${ip}`, 5, 600);
+  if (!allowed) {
+    return errorResponse('rate_limited', 'Too many requests. Please wait a few minutes.', 429);
+  }
 
-  const id = newId();
-  await env.DB.prepare(
-    `INSERT INTO support_messages (id, name, email, topic, version, message, read, created_at)
-     VALUES (?1, ?2, ?3, ?4, ?5, ?6, 0, ?7)`,
-  )
-    .bind(id, name, email, topic, version, message, nowIso())
-    .run();
+  let body: any;
+  try {
+    body = await request.json();
+  } catch {
+    return errorResponse('invalid', 'Invalid JSON payload', 400);
+  }
 
-  await logActivity(env, 'visitor', 'support.submitted', `message ${id} (${topic})`);
-  return json({ status: 'queued' });
+  // Honeypot check for spam bots
+  if (body.website && String(body.website).trim().length > 0) {
+    return jsonResponse({ status: 'queued' });
+  }
+
+  const name = String(body.name || '').trim();
+  const email = String(body.email || '').trim();
+  const topic = String(body.topic || 'other').trim();
+  const version = String(body.version || '').trim();
+  const message = String(body.message || '').trim();
+
+  // Server-side validation
+  const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/;
+  if (name.length < 2 || name.length > 80) {
+    return errorResponse('invalid', 'Name must be between 2 and 80 characters', 400);
+  }
+  if (!emailRegex.test(email) || email.length > 160) {
+    return errorResponse('invalid', 'Invalid email address', 400);
+  }
+  if (message.length < 20 || message.length > 2000) {
+    return errorResponse('invalid', 'Message must be between 20 and 2000 characters', 400);
+  }
+
+  const id = crypto.randomUUID();
+  const now = new Date().toISOString();
+
+  try {
+    await env.DB.prepare(
+      `INSERT INTO support_messages (id, name, email, topic, version, message, read, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, 0, ?)`
+    ).bind(id, name, email, topic, version, message, now).run();
+
+    return jsonResponse({ status: 'queued' }, 201);
+  } catch (err) {
+    console.error('Error saving support message:', err);
+    return errorResponse('unknown', 'Failed to save support message', 500);
+  }
 };

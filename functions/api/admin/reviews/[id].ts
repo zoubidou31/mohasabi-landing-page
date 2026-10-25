@@ -1,30 +1,60 @@
-import type { Env } from '../../../_lib/types';
-import { fail, json, methodNotAllowed, readJson } from '../../../_lib/http';
-import { logActivity, nowIso } from '../../../_lib/db';
+import {
+  Env,
+  authenticateRequest,
+  checkOrigin,
+  errorResponse,
+  jsonResponse,
+  recordAudit,
+} from '../../_shared';
 
-export const onRequest: PagesFunction<Env, 'id'> = async ({ request, env, params }) => {
-  if (request.method !== 'PATCH') return methodNotAllowed(['PATCH']);
+export const onRequestPatch: PagesFunction<Env> = async ({ request, env, params }) => {
+  if (!checkOrigin(request)) {
+    return errorResponse('unauthorized', 'Cross-origin request blocked', 403);
+  }
 
-  const id = typeof params.id === 'string' ? params.id : '';
-  if (id.length === 0 || id.length > 64) return fail('invalid', 400);
+  const { authenticated } = await authenticateRequest(request, env);
+  if (!authenticated) {
+    return errorResponse('unauthorized', 'Admin authentication required', 401);
+  }
 
-  const body = await readJson(request);
-  const action = body?.action;
-  if (action !== 'approve' && action !== 'reject') return fail('invalid', 400);
+  if (!env.DB) {
+    return errorResponse('unavailable', 'Database not configured', 503);
+  }
 
-  const result =
-    action === 'approve'
-      ? await env.DB.prepare(
-          "UPDATE reviews SET status = 'approved', published_at = COALESCE(published_at, ?2) WHERE id = ?1",
-        )
-          .bind(id, nowIso())
-          .run()
-      : await env.DB.prepare("UPDATE reviews SET status = 'rejected', published_at = NULL WHERE id = ?1")
-          .bind(id)
-          .run();
+  const id = String(params.id || '');
+  if (!id) {
+    return errorResponse('invalid', 'Review ID required', 400);
+  }
 
-  if (result.meta.changes === 0) return fail('invalid', 400);
+  let body: any;
+  try {
+    body = await request.json();
+  } catch {
+    return errorResponse('invalid', 'Invalid JSON payload', 400);
+  }
 
-  await logActivity(env, 'admin', action === 'approve' ? 'review.approved' : 'review.rejected', `review ${id}`);
-  return json({ ok: true });
+  const action = body.action;
+  if (action !== 'approve' && action !== 'reject') {
+    return errorResponse('invalid', 'Action must be approve or reject', 400);
+  }
+
+  const newStatus = action === 'approve' ? 'approved' : 'rejected';
+
+  try {
+    await env.DB.prepare('UPDATE reviews SET status = ? WHERE id = ?')
+      .bind(newStatus, id)
+      .run();
+
+    await recordAudit(
+      env.DB,
+      'admin',
+      `review_${newStatus}`,
+      `Review ${id} was ${newStatus}`
+    );
+
+    return jsonResponse({ ok: true, id, status: newStatus });
+  } catch (err) {
+    console.error('Error deciding review:', err);
+    return errorResponse('unknown', 'Failed to update review', 500);
+  }
 };

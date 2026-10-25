@@ -1,2 +1,0 @@
-# Shell scripts must keep LF endings or they fail with "/usr/bin/env: bash\r".
-*.sh text eol=lf

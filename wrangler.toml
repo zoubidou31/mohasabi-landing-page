@@ -1,30 +1,32 @@
-name = "mohasabi"
-compatibility_date = "2026-10-24"
-pages_build_output_dir = "./dist"
+# Cloudflare Pages Configuration for Mohasabi Landing Page
+# https://github.com/zoubidou31/mohasabi-landing-page
 
-# Top-level configuration = PRODUCTION project `mohasabi`.
-# It is intentionally left as a placeholder: the owner must create the real
-# production D1 and paste its id before any production deployment. It must
-# never point at the preview database below.
-#   npx wrangler d1 create mohasabi-cms
-[[d1_databases]]
-binding = "DB"
-database_name = "mohasabi-cms"
-database_id = "00000000-0000-0000-0000-000000000000"
+name = "mohasabi-landing-page"
+compatibility_date = "2024-11-01"
+pages_build_output_dir = "dist"
 
-# Preview configuration = separate project `mohasabi-preview` with its own D1.
-# Cloudflare Pages applies this section only when the branch differs from the
-# project's production branch, so always deploy the preview with:
-#   npm run deploy:preview   (= --project-name mohasabi-preview --branch preview)
-# Deploying that project on its production branch would fall back to the
-# top-level (production) binding, which is why the script pins the branch.
+# =============================================================================
+# Preview Environment (https://mohasabi-preview.pages.dev/)
+# =============================================================================
+# Used for staging, manual verification, and QA testing.
+# Deploy command: npx wrangler pages deploy dist --project-name=mohasabi-preview
 [env.preview]
+name = "mohasabi-preview"
+
 [[env.preview.d1_databases]]
 binding = "DB"
-database_name = "mohasabi-cms-preview"
-database_id = "9d6590b6-7ac0-4dd5-a3b0-62321db906f4"
+database_name = "mohasabi-preview-db"
+database_id = "preview-db-placeholder"
 
-# Secrets are never stored in this file. Per project:
-#   npx wrangler pages secret put ADMIN_PASSWORD --project-name mohasabi-preview
-#   npx wrangler pages secret put SESSION_SECRET --project-name mohasabi-preview
-# (use --project-name mohasabi only with the owner's explicit approval)
+# =============================================================================
+# Production Environment (https://mohasabi.pages.dev/)
+# =============================================================================
+# SAFEGUARD: Production deployment is strictly separated and requires explicit
+# confirmation from the owner. Do not deploy to production directly.
+#
+# [env.production]
+# name = "mohasabi"
+# [[env.production.d1_databases]]
+# binding = "DB"
+# database_name = "mohasabi-prod-db"
+# database_id = "prod-db-placeholder"

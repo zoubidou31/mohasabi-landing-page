@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Check, Mail, MessageCircle } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
-import { usePricingPlans } from '../../hooks/usePricingPlans';
 import {
   buildMailtoPlanUrl,
   buildPlanWhatsAppUrl,
@@ -15,8 +14,7 @@ export const LicensePlans: React.FC = () => {
   const { t } = useLanguage();
   const [duration, setDuration] = useState<DurationId>('year');
 
-  const plans = usePricingPlans();
-  const { durations } = siteConfig.pricing;
+  const { plans, durations } = siteConfig.pricing;
   const currency = t('pricing.currency');
   const activeDuration = durations.find((item) => item.id === duration) ?? durations[3];
   const durationLabel = t(activeDuration.labelKey);

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AlertTriangle, Inbox, MessageCircle, Send, Star } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { useSeo } from '../i18n/useSeo';
+import { usePageTitle } from '../i18n/usePageTitle';
 import { PageHeader } from '../components/ui/PageHeader';
 import { SectionHeading } from '../components/ui/SectionHeading';
 import { Button } from '../components/ui/Button';
@@ -22,7 +22,7 @@ const ratingValues = [1, 2, 3, 4, 5] as const;
 
 export const ReviewsPage: React.FC = () => {
   const { t, locale } = useLanguage();
-  useSeo('seo.page.reviews', 'seo.desc.reviews');
+  usePageTitle('seo.page.reviews');
 
   const [reviews, setReviews] = useState<PublicReview[] | null>(null);
   const [listError, setListError] = useState<'unavailable' | 'rejected' | null>(null);

@@ -1,62 +1,77 @@
-import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Compass } from 'lucide-react';
+import { ArrowLeft, BookOpen, HelpCircle, Home, Tag } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { isRTL } from '../i18n/translations';
+import { usePageTitle } from '../i18n/usePageTitle';
+import { Button } from '../components/ui/Button';
 
 export const NotFoundPage: React.FC = () => {
-  const { t, locale } = useLanguage();
-
-  // A 404 must stay non-indexable and must not advertise a canonical or
-  // hreflang set for a path that does not exist.
-  useEffect(() => {
-    document.title = t('notFound.title');
-    document.documentElement.lang = locale;
-    document.documentElement.dir = isRTL(locale) ? 'rtl' : 'ltr';
-
-    let description = document.head.querySelector<HTMLMetaElement>('meta[name="description"]');
-    if (!description) {
-      description = document.createElement('meta');
-      description.name = 'description';
-      document.head.appendChild(description);
-    }
-    description.content = t('notFound.body');
-
-    let robots = document.head.querySelector<HTMLMetaElement>('meta[name="robots"]');
-    if (!robots) {
-      robots = document.createElement('meta');
-      robots.name = 'robots';
-      document.head.appendChild(robots);
-    }
-    robots.content = 'noindex, nofollow';
-
-    document.head
-      .querySelectorAll('link[rel="canonical"], link[rel="alternate"][hreflang]')
-      .forEach((element) => element.remove());
-  }, [t, locale]);
+  const { t } = useLanguage();
+  usePageTitle('notFound.title');
 
   return (
-    <section className="section bg-surface pt-24">
+    <section className="section bg-surface min-h-[70vh] flex items-center justify-center pt-24 pb-16">
       <div className="container mx-auto px-4 md:px-6 max-w-2xl text-center">
-        <span className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 text-primary mb-5">
-          <Compass className="w-7 h-7" aria-hidden="true" />
+        <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary font-bold rounded-full text-sm mb-4">
+          404
         </span>
-        <p className="text-sm font-semibold text-neutral-500 mb-2">404</p>
-        <h1 className="text-section font-bold text-neutral-900 mb-3">{t('notFound.title')}</h1>
-        <p className="text-neutral-600 leading-relaxed mb-7">{t('notFound.body')}</p>
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center font-semibold rounded-xl bg-primary text-white px-6 py-3 hover:bg-primary-dark transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          >
-            {t('notFound.home')}
-          </Link>
-          <Link
-            to="/support"
-            className="inline-flex items-center justify-center font-semibold rounded-xl bg-surface text-primary border border-primary/30 px-6 py-3 hover:bg-primary-light transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          >
-            {t('notFound.support')}
-          </Link>
+        <h1 className="text-3xl md:text-5xl font-bold text-neutral-900 mb-4 tracking-tight">
+          {t('notFound.heading')}
+        </h1>
+        <p className="text-neutral-600 text-lg leading-relaxed mb-8 max-w-xl mx-auto">
+          {t('notFound.body')}
+        </p>
+
+        <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
+          <Button to="/" variant="primary" size="lg">
+            <Home className="w-4 h-4" aria-hidden="true" />
+            {t('notFound.homeBtn')}
+          </Button>
+          <Button to="/support" variant="secondary" size="lg">
+            <HelpCircle className="w-4 h-4" aria-hidden="true" />
+            {t('notFound.supportBtn')}
+          </Button>
+        </div>
+
+        <div className="rounded-2xl border border-neutral-200 bg-surface-muted p-6 text-start">
+          <h2 className="text-sm font-semibold text-neutral-900 mb-3">{t('notFound.suggestedTitle')}</h2>
+          <ul className="grid sm:grid-cols-2 gap-2 text-sm">
+            <li>
+              <Link
+                to="/installation"
+                className="inline-flex items-center gap-2 text-primary hover:underline p-1.5"
+              >
+                <BookOpen className="w-4 h-4" aria-hidden="true" />
+                {t('nav.guide')}
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/pricing"
+                className="inline-flex items-center gap-2 text-primary hover:underline p-1.5"
+              >
+                <Tag className="w-4 h-4" aria-hidden="true" />
+                {t('nav.pricing')}
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/updates"
+                className="inline-flex items-center gap-2 text-primary hover:underline p-1.5"
+              >
+                <ArrowLeft className="w-4 h-4 rtl:rotate-180" aria-hidden="true" />
+                {t('nav.whatsNew')}
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/reviews"
+                className="inline-flex items-center gap-2 text-primary hover:underline p-1.5"
+              >
+                <ArrowLeft className="w-4 h-4 rtl:rotate-180" aria-hidden="true" />
+                {t('nav.reviews')}
+              </Link>
+            </li>
+          </ul>
         </div>
       </div>
     </section>

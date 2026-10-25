@@ -9,10 +9,10 @@ import { Audience } from '../components/sections/Audience';
 import { PricingPreview } from '../components/sections/PricingPreview';
 import { FAQ } from '../components/sections/FAQ';
 import { DownloadCTA } from '../components/sections/DownloadCTA';
-import { useSeo } from '../i18n/useSeo';
+import { usePageTitle } from '../i18n/usePageTitle';
 
 export const HomePage: React.FC = () => {
-  useSeo('seo.page.home', 'seo.desc.home');
+  usePageTitle('seo.page.home');
 
   return (
     <>
