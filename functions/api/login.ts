@@ -1,5 +1,4 @@
 import {
-  Env,
   checkOrigin,
   checkRateLimit,
   createSessionToken,
@@ -8,6 +7,7 @@ import {
   jsonResponse,
   recordAudit,
 } from './_shared';
+import type { Env, PagesFunction } from './_shared';
 
 async function constantTimeCompare(a: string, b: string): Promise<boolean> {
   const enc = new TextEncoder();
@@ -28,9 +28,16 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     return errorResponse('unauthorized', 'Cross-origin request blocked', 403);
   }
 
+  if (!env.DB) {
+    return errorResponse('unavailable', 'Database not configured', 503);
+  }
+
   const ip = getClientIp(request);
-  const allowed = await checkRateLimit(env.DB, `login:${ip}`, 5, 900); // 5 attempts per 15 minutes
-  if (!allowed) {
+  const rl = await checkRateLimit(env.DB, `login:${ip}`, 5, 900); // 5 attempts per 15 minutes
+  if (rl.unavailable) {
+    return errorResponse('unavailable', 'Rate limiting storage unavailable. Please try again later.', 503);
+  }
+  if (!rl.allowed) {
     return errorResponse('rate_limited', 'Too many failed login attempts. Please try again in 15 minutes.', 429);
   }
 

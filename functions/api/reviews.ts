@@ -47,8 +47,11 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   }
 
   const ip = getClientIp(request);
-  const allowed = await checkRateLimit(env.DB, `review:${ip}`, 5, 600);
-  if (!allowed) {
+  const rl = await checkRateLimit(env.DB, `review:${ip}`, 5, 600);
+  if (rl.unavailable) {
+    return errorResponse('unavailable', 'Rate limiting storage unavailable. Please try again later.', 503);
+  }
+  if (!rl.allowed) {
     return errorResponse('rate_limited', 'Too many reviews submitted. Please try again later.', 429);
   }
 

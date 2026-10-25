@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   createSessionToken,
   verifySessionToken,
@@ -6,7 +6,10 @@ import {
   checkOrigin,
   getClientIp,
   timingSafeEqual,
+  checkRateLimit,
 } from '../../functions/api/_shared';
+import type { D1Database } from '../../functions/api/_shared';
+import { onRequestPost as loginPost } from '../../functions/api/login';
 
 describe('Backend Security & Cryptographic Sessions', () => {
   const testSecret = ['mock', 'session', 'secret', '32chars'].join('-');
@@ -170,6 +173,100 @@ describe('Backend Security & Cryptographic Sessions', () => {
       /SESSION_SECRET is missing or does not meet minimum security requirements/
     );
     expect((await verifySessionToken('admin:9999999999:sig', emptyEnv)).valid).toBe(false);
+  });
+
+  it('enforces fail-closed defense in checkRateLimit when DB is missing or queries fail', async () => {
+    // 1. Missing DB must fail closed (never allow bypass)
+    const missingDbResult = await checkRateLimit(undefined, 'login:127.0.0.1', 5, 60);
+    expect(missingDbResult.allowed).toBe(false);
+    expect(missingDbResult.unavailable).toBe(true);
+
+    // 2. Failing DB (database crash / query error) must fail closed
+    const failingDb = {
+      prepare: vi.fn().mockImplementation(() => {
+        throw new Error('D1 storage connection failure');
+      }),
+    } as unknown as D1Database;
+
+    const failingDbResult = await checkRateLimit(failingDb, 'login:127.0.0.1', 5, 60);
+    expect(failingDbResult.allowed).toBe(false);
+    expect(failingDbResult.unavailable).toBe(true);
+
+    // 3. Normal DB within limit
+    const allowedDb = {
+      prepare: vi.fn().mockReturnValue({
+        bind: vi.fn().mockReturnValue({
+          first: vi.fn().mockResolvedValue({ count: 2 }),
+        }),
+      }),
+    } as unknown as D1Database;
+    const allowedResult = await checkRateLimit(allowedDb, 'login:127.0.0.1', 5, 60);
+    expect(allowedResult.allowed).toBe(true);
+    expect(allowedResult.unavailable).toBeUndefined();
+
+    // 4. Normal DB over limit
+    const exceededDb = {
+      prepare: vi.fn().mockReturnValue({
+        bind: vi.fn().mockReturnValue({
+          first: vi.fn().mockResolvedValue({ count: 6 }),
+        }),
+      }),
+    } as unknown as D1Database;
+    const exceededResult = await checkRateLimit(exceededDb, 'login:127.0.0.1', 5, 60);
+    expect(exceededResult.allowed).toBe(false);
+  });
+
+  it('prevents login attempts from bypassing rate limiting when DB is unavailable or failing', async () => {
+    // Attempt login when DB is missing from environment
+    const reqNoDb = new Request('https://mohasabi-preview.pages.dev/api/login', {
+      method: 'POST',
+      headers: {
+        Origin: 'https://mohasabi-preview.pages.dev',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ password: 'any-password' }),
+    });
+
+    const resNoDb = await loginPost({
+      request: reqNoDb,
+      env: {
+        ADMIN_PASSWORD: testPassword,
+        SESSION_SECRET: testSecret,
+      },
+    } as any);
+
+    expect(resNoDb.status).toBe(503);
+    const bodyNoDb = (await resNoDb.json()) as any;
+    expect(bodyNoDb.error).toBe('unavailable');
+
+    // Attempt login when DB throws an internal error during rate limiting
+    const failingDb = {
+      prepare: vi.fn().mockImplementation(() => {
+        throw new Error('D1 cluster unreachable');
+      }),
+    } as unknown as D1Database;
+
+    const reqFailingDb = new Request('https://mohasabi-preview.pages.dev/api/login', {
+      method: 'POST',
+      headers: {
+        Origin: 'https://mohasabi-preview.pages.dev',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ password: 'any-password' }),
+    });
+
+    const resFailingDb = await loginPost({
+      request: reqFailingDb,
+      env: {
+        DB: failingDb,
+        ADMIN_PASSWORD: testPassword,
+        SESSION_SECRET: testSecret,
+      },
+    } as any);
+
+    expect(resFailingDb.status).toBe(503);
+    const bodyFailingDb = (await resFailingDb.json()) as any;
+    expect(bodyFailingDb.error).toBe('unavailable');
   });
 });
 

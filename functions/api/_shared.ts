@@ -6,6 +6,15 @@ export interface Env {
   SESSION_SECRET?: string;
 }
 
+export type PagesFunction<TEnv = Env> = (context: {
+  request: Request;
+  env: TEnv;
+  params?: Record<string, string>;
+  next?: () => Promise<Response>;
+  waitUntil?: (promise: Promise<unknown>) => void;
+  data?: Record<string, unknown>;
+}) => Promise<Response> | Response;
+
 export interface D1Database {
   prepare(query: string): D1PreparedStatement;
   batch<T = unknown>(statements: D1PreparedStatement[]): Promise<D1Result<T>[]>;
@@ -218,16 +227,24 @@ export async function authenticateRequest(request: Request, env: Env): Promise<{
 }
 
 // -----------------------------------------------------------------------------
-// Rate Limiting (D1-backed with safe fallthrough)
+// Rate Limiting (D1-backed with safe fail-closed defense)
 // -----------------------------------------------------------------------------
+
+export interface RateLimitResult {
+  allowed: boolean;
+  unavailable?: boolean;
+}
 
 export async function checkRateLimit(
   db: D1Database | undefined,
   key: string,
   maxRequests: number,
   windowSec: number
-): Promise<boolean> {
-  if (!db) return true; // If DB is not bound, don't crash
+): Promise<RateLimitResult> {
+  if (!db) {
+    // Fail closed: without database connection, rate limiting cannot be enforced
+    return { allowed: false, unavailable: true };
+  }
 
   try {
     // Primary strategy: bucket / window_start / count (matches mohasabi-cms-preview schema)
@@ -243,7 +260,7 @@ export async function checkRateLimit(
       .first<{ count: number }>();
 
     if (row && typeof row.count === 'number') {
-      return row.count <= maxRequests;
+      return { allowed: row.count <= maxRequests };
     }
   } catch {
     // Secondary fallback strategy: key / count / reset_at
@@ -253,19 +270,21 @@ export async function checkRateLimit(
       const row = await db.prepare('SELECT count, reset_at FROM rate_limits WHERE key = ?').bind(key).first<{ count: number; reset_at: number }>();
       if (!row || row.reset_at < now) {
         await db.prepare('INSERT OR REPLACE INTO rate_limits (key, count, reset_at) VALUES (?, 1, ?)').bind(key, resetAt).run();
-        return true;
+        return { allowed: true };
       }
       if (row.count >= maxRequests) {
-        return false;
+        return { allowed: false };
       }
       await db.prepare('UPDATE rate_limits SET count = count + 1 WHERE key = ?').bind(key).run();
-      return true;
-    } catch {
-      return true; // Fail open gracefully on DB error
+      return { allowed: true };
+    } catch (secondaryErr) {
+      console.error('All rate limiting strategies failed:', secondaryErr);
+      // Fail closed: when both storage strategies fail, block requests rather than allowing brute force
+      return { allowed: false, unavailable: true };
     }
   }
 
-  return true;
+  return { allowed: false, unavailable: true };
 }
 
 // -----------------------------------------------------------------------------
