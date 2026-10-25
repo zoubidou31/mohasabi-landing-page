@@ -1,11 +1,11 @@
 import {
-  Env,
   checkOrigin,
   checkRateLimit,
   errorResponse,
   getClientIp,
   jsonResponse,
 } from './_shared';
+import type { Env, PagesFunction } from './_shared';
 
 interface PublicReview {
   id: string;

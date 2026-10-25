@@ -10,6 +10,8 @@ import {
 } from '../../functions/api/_shared';
 import type { D1Database } from '../../functions/api/_shared';
 import { onRequestPost as loginPost } from '../../functions/api/login';
+import { onRequestPost as reviewsPost } from '../../functions/api/reviews';
+import { onRequestPost as supportPost } from '../../functions/api/support';
 
 describe('Backend Security & Cryptographic Sessions', () => {
   const testSecret = ['mock', 'session', 'secret', '32chars'].join('-');
@@ -267,6 +269,276 @@ describe('Backend Security & Cryptographic Sessions', () => {
     expect(resFailingDb.status).toBe(503);
     const bodyFailingDb = (await resFailingDb.json()) as any;
     expect(bodyFailingDb.error).toBe('unavailable');
+  });
+
+  it('enforces rate limit handling on reviews endpoint without saving to DB when blocked or failing', async () => {
+    const validPayload = {
+      email: 'customer@example.com',
+      displayName: 'Customer',
+      rating: 5,
+      title: 'Excellent Program',
+      body: 'This is a genuine review with more than fifteen characters.',
+      consent: true,
+    };
+
+    // 1. When rate limited (allowed: false)
+    const runMock = vi.fn().mockResolvedValue({ success: true });
+    const exceededDb = {
+      prepare: vi.fn().mockImplementation((query: string) => {
+        if (query.includes('rate_limits')) {
+          return {
+            bind: vi.fn().mockReturnValue({
+              first: vi.fn().mockResolvedValue({ count: 10 }), // exceeded
+            }),
+          };
+        }
+        return {
+          bind: vi.fn().mockReturnValue({
+            first: vi.fn().mockResolvedValue(null),
+            run: runMock,
+          }),
+        };
+      }),
+    } as unknown as D1Database;
+
+    const reqExceeded = new Request('https://mohasabi-preview.pages.dev/api/reviews', {
+      method: 'POST',
+      headers: {
+        Origin: 'https://mohasabi-preview.pages.dev',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(validPayload),
+    });
+
+    const resExceeded = await reviewsPost({
+      request: reqExceeded,
+      env: { DB: exceededDb },
+    } as any);
+
+    expect(resExceeded.status).toBe(429);
+    const bodyExceeded = (await resExceeded.json()) as any;
+    expect(bodyExceeded.error).toBe('rate_limited');
+    expect(runMock).not.toHaveBeenCalled(); // No review was inserted!
+
+    // 2. When rate limit storage fails (unavailable: true)
+    const failingDb = {
+      prepare: vi.fn().mockImplementation((query: string) => {
+        if (query.includes('rate_limits')) {
+          throw new Error('D1 storage unavailable');
+        }
+        return {
+          bind: vi.fn().mockReturnValue({
+            first: vi.fn().mockResolvedValue(null),
+            run: runMock,
+          }),
+        };
+      }),
+    } as unknown as D1Database;
+
+    const reqFailing = new Request('https://mohasabi-preview.pages.dev/api/reviews', {
+      method: 'POST',
+      headers: {
+        Origin: 'https://mohasabi-preview.pages.dev',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(validPayload),
+    });
+
+    const resFailing = await reviewsPost({
+      request: reqFailing,
+      env: { DB: failingDb },
+    } as any);
+
+    expect(resFailing.status).toBe(503);
+    const bodyFailing = (await resFailing.json()) as any;
+    expect(bodyFailing.error).toBe('unavailable');
+    expect(runMock).not.toHaveBeenCalled(); // No review was inserted!
+
+    // 3. When rate limit is allowed (allowed: true)
+    const allowedDb = {
+      prepare: vi.fn().mockImplementation((query: string) => {
+        if (query.includes('rate_limits')) {
+          return {
+            bind: vi.fn().mockReturnValue({
+              first: vi.fn().mockResolvedValue({ count: 1 }), // allowed
+            }),
+          };
+        }
+        return {
+          bind: vi.fn().mockReturnValue({
+            first: vi.fn().mockResolvedValue(null), // no duplicate
+            run: runMock,
+          }),
+        };
+      }),
+    } as unknown as D1Database;
+
+    const reqAllowed = new Request('https://mohasabi-preview.pages.dev/api/reviews', {
+      method: 'POST',
+      headers: {
+        Origin: 'https://mohasabi-preview.pages.dev',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(validPayload),
+    });
+
+    const resAllowed = await reviewsPost({
+      request: reqAllowed,
+      env: { DB: allowedDb },
+    } as any);
+
+    expect(resAllowed.status).toBe(201);
+    expect(runMock).toHaveBeenCalled(); // Review successfully stored!
+
+    // 4. Invalid input fails with 400 without crashing
+    const reqInvalid = new Request('https://mohasabi-preview.pages.dev/api/reviews', {
+      method: 'POST',
+      headers: {
+        Origin: 'https://mohasabi-preview.pages.dev',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ...validPayload, email: 'not-an-email' }),
+    });
+
+    const resInvalid = await reviewsPost({
+      request: reqInvalid,
+      env: { DB: allowedDb },
+    } as any);
+
+    expect(resInvalid.status).toBe(400);
+  });
+
+  it('enforces rate limit handling on support endpoint without saving to DB when blocked or failing', async () => {
+    const validSupportPayload = {
+      name: 'Mohamed',
+      email: 'mohamed@example.com',
+      topic: 'general',
+      version: 'v1.0.3',
+      message: 'This is a detailed support message that meets the minimum length requirement.',
+    };
+
+    // 1. When rate limited (allowed: false)
+    const runMock = vi.fn().mockResolvedValue({ success: true });
+    const exceededDb = {
+      prepare: vi.fn().mockImplementation((query: string) => {
+        if (query.includes('rate_limits')) {
+          return {
+            bind: vi.fn().mockReturnValue({
+              first: vi.fn().mockResolvedValue({ count: 10 }),
+            }),
+          };
+        }
+        return {
+          bind: vi.fn().mockReturnValue({
+            run: runMock,
+          }),
+        };
+      }),
+    } as unknown as D1Database;
+
+    const reqExceeded = new Request('https://mohasabi-preview.pages.dev/api/support', {
+      method: 'POST',
+      headers: {
+        Origin: 'https://mohasabi-preview.pages.dev',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(validSupportPayload),
+    });
+
+    const resExceeded = await supportPost({
+      request: reqExceeded,
+      env: { DB: exceededDb },
+    } as any);
+
+    expect(resExceeded.status).toBe(429);
+    const bodyExceeded = (await resExceeded.json()) as any;
+    expect(bodyExceeded.error).toBe('rate_limited');
+    expect(runMock).not.toHaveBeenCalled(); // No support message was inserted!
+
+    // 2. When rate limit storage fails (unavailable: true)
+    const failingDb = {
+      prepare: vi.fn().mockImplementation((query: string) => {
+        if (query.includes('rate_limits')) {
+          throw new Error('D1 storage connection failure');
+        }
+        return {
+          bind: vi.fn().mockReturnValue({
+            run: runMock,
+          }),
+        };
+      }),
+    } as unknown as D1Database;
+
+    const reqFailing = new Request('https://mohasabi-preview.pages.dev/api/support', {
+      method: 'POST',
+      headers: {
+        Origin: 'https://mohasabi-preview.pages.dev',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(validSupportPayload),
+    });
+
+    const resFailing = await supportPost({
+      request: reqFailing,
+      env: { DB: failingDb },
+    } as any);
+
+    expect(resFailing.status).toBe(503);
+    const bodyFailing = (await resFailing.json()) as any;
+    expect(bodyFailing.error).toBe('unavailable');
+    expect(runMock).not.toHaveBeenCalled(); // No support message was inserted!
+
+    // 3. When rate limit is allowed (allowed: true)
+    const allowedDb = {
+      prepare: vi.fn().mockImplementation((query: string) => {
+        if (query.includes('rate_limits')) {
+          return {
+            bind: vi.fn().mockReturnValue({
+              first: vi.fn().mockResolvedValue({ count: 1 }),
+            }),
+          };
+        }
+        return {
+          bind: vi.fn().mockReturnValue({
+            run: runMock,
+          }),
+        };
+      }),
+    } as unknown as D1Database;
+
+    const reqAllowed = new Request('https://mohasabi-preview.pages.dev/api/support', {
+      method: 'POST',
+      headers: {
+        Origin: 'https://mohasabi-preview.pages.dev',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(validSupportPayload),
+    });
+
+    const resAllowed = await supportPost({
+      request: reqAllowed,
+      env: { DB: allowedDb },
+    } as any);
+
+    expect(resAllowed.status).toBe(201);
+    expect(runMock).toHaveBeenCalled(); // Message successfully stored!
+
+    // 4. Invalid input fails with 400
+    const reqInvalid = new Request('https://mohasabi-preview.pages.dev/api/support', {
+      method: 'POST',
+      headers: {
+        Origin: 'https://mohasabi-preview.pages.dev',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ...validSupportPayload, message: 'Too short' }),
+    });
+
+    const resInvalid = await supportPost({
+      request: reqInvalid,
+      env: { DB: allowedDb },
+    } as any);
+
+    expect(resInvalid.status).toBe(400);
   });
 });
 
