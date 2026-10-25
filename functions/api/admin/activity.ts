@@ -25,15 +25,27 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
 
   try {
     const { results } = await env.DB.prepare(
-      `SELECT id, created_at as at, actor, action, detail
-       FROM audit_log
-       ORDER BY created_at DESC
+      `SELECT id, at, actor, action, detail
+       FROM admin_activity
+       ORDER BY at DESC
        LIMIT 50`
     ).all<ActivityEntry>();
 
     return jsonResponse({ entries: results || [] });
   } catch (err) {
-    console.error('Error fetching activity log:', err);
-    return errorResponse('unknown', 'Failed to retrieve activity log', 500);
+    try {
+      const { results } = await env.DB.prepare(
+        `SELECT id, created_at as at, actor, action, detail
+         FROM audit_log
+         ORDER BY created_at DESC
+         LIMIT 50`
+      ).all<ActivityEntry>();
+
+      return jsonResponse({ entries: results || [] });
+    } catch {
+      console.error('Error fetching activity log:', err);
+      return errorResponse('unknown', 'Failed to retrieve activity log', 500);
+    }
   }
 };
+

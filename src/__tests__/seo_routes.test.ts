@@ -72,3 +72,4 @@ describe('SEO, Robots, Sitemap and Directives', () => {
     expect(content).toContain('/* /index.html 200');
   });
 });
+

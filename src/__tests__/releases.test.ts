@@ -53,3 +53,4 @@ describe('Software Releases & Integrity', () => {
     expect(formatBytes(314248129, 'ar')).toContain('MiB');
   });
 });
+

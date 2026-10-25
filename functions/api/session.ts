@@ -11,3 +11,4 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     user: authenticated ? user || 'admin' : 'anonymous',
   });
 };
+

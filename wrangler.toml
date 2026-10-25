@@ -1,32 +1,27 @@
 # Cloudflare Pages Configuration for Mohasabi Landing Page
-# https://github.com/zoubidou31/mohasabi-landing-page
+# Project: mohasabi-preview (https://mohasabi-preview.pages.dev/)
+# Target Repository: https://github.com/zoubidou31/mohasabi-landing-page
 
-name = "mohasabi-landing-page"
-compatibility_date = "2024-11-01"
-pages_build_output_dir = "dist"
-
-# =============================================================================
-# Preview Environment (https://mohasabi-preview.pages.dev/)
-# =============================================================================
-# Used for staging, manual verification, and QA testing.
-# Deploy command: npx wrangler pages deploy dist --project-name=mohasabi-preview
-[env.preview]
 name = "mohasabi-preview"
+compatibility_date = "2026-10-24"
+pages_build_output_dir = "dist"
+compatibility_flags = ["nodejs_compat"]
 
-[[env.preview.d1_databases]]
+# =============================================================================
+# Cloudflare D1 Database Binding (Preview)
+# Verified from Cloudflare Account: Mohzoubid@gmail.com's Account (adfa6d8041b3c4fdd0dfe831401bda7e)
+# =============================================================================
+[[d1_databases]]
 binding = "DB"
-database_name = "mohasabi-preview-db"
-database_id = "preview-db-placeholder"
+database_name = "mohasabi-cms-preview"
+database_id = "9d6590b6-7ac0-4dd5-a3b0-62321db906f4"
+
+[vars]
+ENVIRONMENT = "preview"
+SITE_URL = "https://mohasabi-preview.pages.dev"
 
 # =============================================================================
-# Production Environment (https://mohasabi.pages.dev/)
+# Production Safeguard (https://mohasabi.pages.dev/)
 # =============================================================================
-# SAFEGUARD: Production deployment is strictly separated and requires explicit
-# confirmation from the owner. Do not deploy to production directly.
-#
-# [env.production]
-# name = "mohasabi"
-# [[env.production.d1_databases]]
-# binding = "DB"
-# database_name = "mohasabi-prod-db"
-# database_id = "prod-db-placeholder"
+# Production project `mohasabi` is managed separately and strictly protected.
+# Do not point this file or any automated deployments at the production database.

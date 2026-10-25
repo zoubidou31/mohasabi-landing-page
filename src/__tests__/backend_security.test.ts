@@ -5,6 +5,7 @@ import {
   parseCookies,
   checkOrigin,
   getClientIp,
+  timingSafeEqual,
 } from '../../functions/api/_shared';
 
 describe('Backend Security & Cryptographic Sessions', () => {
@@ -97,4 +98,12 @@ describe('Backend Security & Cryptographic Sessions', () => {
     });
     expect(getClientIp(reqWithForwarded)).toBe('197.200.10.6');
   });
+
+  it('performs timing-safe string comparison without early bailout', () => {
+    expect(timingSafeEqual('admin123', 'admin123')).toBe(true);
+    expect(timingSafeEqual('admin123', 'admin124')).toBe(false);
+    expect(timingSafeEqual('short', 'longer-string')).toBe(false);
+    expect(timingSafeEqual('', '')).toBe(true);
+  });
 });
+

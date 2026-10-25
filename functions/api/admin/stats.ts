@@ -34,3 +34,4 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     return errorResponse('unknown', 'Failed to retrieve stats', 500);
   }
 };
+

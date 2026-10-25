@@ -240,3 +240,4 @@ export const InstallationPage: React.FC = () => {
     </>
   );
 };
+

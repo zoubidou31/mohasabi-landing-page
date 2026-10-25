@@ -16,3 +16,4 @@ export const onRequest: PagesFunction = async ({ next }) => {
     headers,
   });
 };
+

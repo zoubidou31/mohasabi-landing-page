@@ -67,3 +67,4 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     return errorResponse('unknown', 'Failed to save support message', 500);
   }
 };
+

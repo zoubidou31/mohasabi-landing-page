@@ -77,3 +77,4 @@ export const NotFoundPage: React.FC = () => {
     </section>
   );
 };
+

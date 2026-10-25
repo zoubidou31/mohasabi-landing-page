@@ -72,3 +72,4 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     { 'Set-Cookie': cookie }
   );
 };
+

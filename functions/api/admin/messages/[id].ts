@@ -53,3 +53,4 @@ export const onRequestPatch: PagesFunction<Env> = async ({ request, env, params 
     return errorResponse('unknown', 'Failed to update message', 500);
   }
 };
+

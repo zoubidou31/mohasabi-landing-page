@@ -45,3 +45,4 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     return errorResponse('unknown', 'Failed to retrieve messages', 500);
   }
 };
+

@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:run": "vitest run",
     "qa:sec": "node scripts/qa-sec.js",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy:preview": "npx wrangler pages deploy dist --project-name=mohasabi-preview"
   },
   "dependencies": {
     "framer-motion": "^14.6.0",

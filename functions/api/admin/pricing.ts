@@ -92,20 +92,21 @@ export const onRequestPut: PagesFunction<Env> = async ({ request, env }) => {
   try {
     const stmts = plans.map((plan) =>
       env.DB!.prepare(
-        `INSERT INTO pricing_plans (id, name, month, quarter, half_year, year, updated_at, note)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-         ON CONFLICT(id) DO UPDATE SET
-           name = excluded.name,
-           month = excluded.month,
-           quarter = excluded.quarter,
-           half_year = excluded.half_year,
-           year = excluded.year,
-           updated_at = excluded.updated_at,
-           note = excluded.note`
-      ).bind(plan.id, plan.name, plan.month, plan.quarter, plan.halfYear, plan.year, now, note)
+        `UPDATE pricing_plans
+            SET name = ?2, month = ?3, quarter = ?4, half_year = ?5, year = ?6, updated_at = ?7
+          WHERE id = ?1`
+      ).bind(plan.id, plan.name, plan.month, plan.quarter, plan.halfYear, plan.year, now)
     );
 
-    await env.DB.batch(stmts);
+    await env.DB!.batch(stmts);
+
+    try {
+      await env.DB!.prepare(
+        'INSERT INTO pricing_changes (id, at, actor, note, snapshot) VALUES (?, ?, ?, ?, ?)'
+      ).bind(crypto.randomUUID(), now, 'admin', note || 'table updated', JSON.stringify(plans)).run();
+    } catch {
+      // Gracefully ignore if pricing_changes table does not exist
+    }
 
     await recordAudit(
       env.DB,
@@ -120,3 +121,4 @@ export const onRequestPut: PagesFunction<Env> = async ({ request, env }) => {
     return errorResponse('unknown', 'Failed to save pricing', 500);
   }
 };
+

@@ -93,6 +93,15 @@ export function getClientIp(request: Request): string {
   );
 }
 
+export function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
 // -----------------------------------------------------------------------------
 // Cryptography & Session Tokens (HMAC-SHA256)
 // -----------------------------------------------------------------------------
@@ -194,31 +203,44 @@ export async function checkRateLimit(
   windowSec: number
 ): Promise<boolean> {
   if (!db) return true; // If DB is not bound, don't crash
-  const now = Math.floor(Date.now() / 1000);
-  const resetAt = now + windowSec;
 
   try {
-    // Clean old expired limits opportunistically (1% chance or simple clean)
-    if (Math.random() < 0.05) {
-      void db.prepare('DELETE FROM rate_limits WHERE reset_at < ?').bind(now).run();
+    // Primary strategy: bucket / window_start / count (matches mohasabi-cms-preview schema)
+    const windowStart = Math.floor(Date.now() / 1000 / windowSec) * windowSec;
+    const row = await db.prepare(
+      `INSERT INTO rate_limits (bucket, window_start, count) VALUES (?1, ?2, 1)
+       ON CONFLICT(bucket) DO UPDATE SET
+         count = CASE WHEN excluded.window_start > rate_limits.window_start THEN 1 ELSE rate_limits.count + 1 END,
+         window_start = CASE WHEN excluded.window_start > rate_limits.window_start THEN excluded.window_start ELSE rate_limits.window_start END
+       RETURNING count AS count`
+    )
+      .bind(key, windowStart)
+      .first<{ count: number }>();
+
+    if (row && typeof row.count === 'number') {
+      return row.count <= maxRequests;
     }
-
-    const row = await db.prepare('SELECT count, reset_at FROM rate_limits WHERE key = ?').bind(key).first<{ count: number; reset_at: number }>();
-
-    if (!row || row.reset_at < now) {
-      await db.prepare('INSERT OR REPLACE INTO rate_limits (key, count, reset_at) VALUES (?, 1, ?)').bind(key, resetAt).run();
-      return true;
-    }
-
-    if (row.count >= maxRequests) {
-      return false;
-    }
-
-    await db.prepare('UPDATE rate_limits SET count = count + 1 WHERE key = ?').bind(key).run();
-    return true;
   } catch {
-    return true; // Fail open gracefully on DB error
+    // Secondary fallback strategy: key / count / reset_at
+    try {
+      const now = Math.floor(Date.now() / 1000);
+      const resetAt = now + windowSec;
+      const row = await db.prepare('SELECT count, reset_at FROM rate_limits WHERE key = ?').bind(key).first<{ count: number; reset_at: number }>();
+      if (!row || row.reset_at < now) {
+        await db.prepare('INSERT OR REPLACE INTO rate_limits (key, count, reset_at) VALUES (?, 1, ?)').bind(key, resetAt).run();
+        return true;
+      }
+      if (row.count >= maxRequests) {
+        return false;
+      }
+      await db.prepare('UPDATE rate_limits SET count = count + 1 WHERE key = ?').bind(key).run();
+      return true;
+    } catch {
+      return true; // Fail open gracefully on DB error
+    }
   }
+
+  return true;
 }
 
 // -----------------------------------------------------------------------------
@@ -233,12 +255,20 @@ export async function recordAudit(
 ): Promise<void> {
   if (!db) return;
   const id = crypto.randomUUID();
-  const createdAt = new Date().toISOString();
+  const now = new Date().toISOString();
   try {
-    await db.prepare('INSERT INTO audit_log (id, actor, action, detail, created_at) VALUES (?, ?, ?, ?, ?)')
-      .bind(id, actor, action, detail, createdAt)
+    // Primary: admin_activity (matches mohasabi-cms-preview schema)
+    await db.prepare('INSERT INTO admin_activity (id, at, actor, action, detail) VALUES (?, ?, ?, ?, ?)')
+      .bind(id, now, actor, action, detail.slice(0, 300))
       .run();
-  } catch (err) {
-    console.error('Failed to write audit log:', err);
+  } catch {
+    // Secondary fallback: audit_log
+    try {
+      await db.prepare('INSERT INTO audit_log (id, actor, action, detail, created_at) VALUES (?, ?, ?, ?, ?)')
+        .bind(id, actor, action, detail.slice(0, 300), now)
+        .run();
+    } catch (err) {
+      console.error('Failed to write audit log:', err);
+    }
   }
 }
