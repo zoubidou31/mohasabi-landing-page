@@ -100,5 +100,31 @@ describe('API Client & Safe Host Handling', () => {
       expect(result.status).toBe(0);
     }
   });
+
+  it('correctly handles admin pricing response with DZD plans', async () => {
+    const mockPricing = {
+      plans: [
+        { id: 'standard', name: 'Standard', month: 1500, quarter: 3500, halfYear: 6500, year: 12000 },
+        { id: 'pro', name: 'Pro', month: 3000, quarter: 7500, halfYear: 13500, year: 25000 },
+        { id: 'enterprise', name: 'Enterprise', month: 5500, quarter: 13000, halfYear: 24000, year: 45000 },
+      ],
+      updatedAt: '2026-10-24T15:55:03.287Z',
+    };
+
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ 'content-type': 'application/json' }),
+      json: async () => mockPricing,
+    } as Response);
+
+    const result = await api.admin.pricing();
+    expect(result.kind).toBe('ok');
+    if (result.kind === 'ok') {
+      expect(result.data.plans).toHaveLength(3);
+      expect(result.data.plans[0].month).toBe(1500);
+      expect(result.data.plans[1].year).toBe(25000);
+    }
+  });
 });
 

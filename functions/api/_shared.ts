@@ -106,8 +106,6 @@ export function timingSafeEqual(a: string, b: string): boolean {
 // Cryptography & Session Tokens (HMAC-SHA256)
 // -----------------------------------------------------------------------------
 
-const DEFAULT_SECRET = 'mohasabi-default-session-signature-secret-key-salt-2026';
-
 async function getHmacKey(secret: string): Promise<CryptoKey> {
   const encoder = new TextEncoder();
   return crypto.subtle.importKey(
@@ -135,7 +133,10 @@ function hexToBuf(hex: string): Uint8Array {
 }
 
 export async function createSessionToken(username: string, env: Env, ttlMs = 86400000): Promise<string> {
-  const secret = env.SESSION_SECRET || env.ADMIN_PASSWORD || DEFAULT_SECRET;
+  const secret = env.SESSION_SECRET || env.ADMIN_PASSWORD;
+  if (!secret) {
+    throw new Error('Authentication signing secret is missing; session token generation failed closed.');
+  }
   const key = await getHmacKey(secret);
   const expiresAt = Date.now() + ttlMs;
   const payload = `${username}:${expiresAt}`;
@@ -146,6 +147,13 @@ export async function createSessionToken(username: string, env: Env, ttlMs = 864
 
 export async function verifySessionToken(token: string | null | undefined, env: Env): Promise<{ valid: boolean; user?: string }> {
   if (!token) return { valid: false };
+
+  const secret = env.SESSION_SECRET || env.ADMIN_PASSWORD;
+  if (!secret) {
+    // Fail closed: without the server secret, no token can be legitimately verified
+    return { valid: false };
+  }
+
   const parts = token.split(':');
   if (parts.length !== 3) return { valid: false };
 
@@ -153,7 +161,6 @@ export async function verifySessionToken(token: string | null | undefined, env: 
   const expiresAt = parseInt(expStr, 10);
   if (isNaN(expiresAt) || Date.now() > expiresAt) return { valid: false };
 
-  const secret = env.SESSION_SECRET || env.ADMIN_PASSWORD || DEFAULT_SECRET;
   const key = await getHmacKey(secret);
   const payload = `${username}:${expStr}`;
 

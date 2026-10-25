@@ -34,3 +34,4 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
     return errorResponse('unknown', 'Failed to retrieve pricing', 500);
   }
 };
+

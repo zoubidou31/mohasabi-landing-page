@@ -105,5 +105,17 @@ describe('Backend Security & Cryptographic Sessions', () => {
     expect(timingSafeEqual('short', 'longer-string')).toBe(false);
     expect(timingSafeEqual('', '')).toBe(true);
   });
+
+  it('fails closed when secrets are missing (no hardcoded fallback)', async () => {
+    const emptyEnv = {};
+    // Verifying any token without a server secret must return false
+    const check = await verifySessionToken('admin:9999999999:sig', emptyEnv);
+    expect(check.valid).toBe(false);
+
+    // Creating a token without a server secret must reject/throw
+    await expect(createSessionToken('admin', emptyEnv)).rejects.toThrow(
+      /Authentication signing secret is missing/
+    );
+  });
 });
 
