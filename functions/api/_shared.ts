@@ -63,26 +63,35 @@ export function checkOrigin(request: Request): boolean {
   const method = request.method.toUpperCase();
   if (['GET', 'HEAD', 'OPTIONS'].includes(method)) return true;
 
+  let requestUrl: URL;
+  try {
+    requestUrl = new URL(request.url);
+  } catch {
+    return false;
+  }
+
   const origin = request.headers.get('Origin');
-  if (!origin) {
-    const referer = request.headers.get('Referer');
-    if (!referer) return true; // Same-origin direct requests might omit Origin
+  if (origin) {
     try {
-      const refererUrl = new URL(referer);
-      const requestUrl = new URL(request.url);
-      return refererUrl.host === requestUrl.host;
+      const originUrl = new URL(origin);
+      return originUrl.host === requestUrl.host && originUrl.protocol === requestUrl.protocol;
     } catch {
       return false;
     }
   }
 
-  try {
-    const originUrl = new URL(origin);
-    const requestUrl = new URL(request.url);
-    return originUrl.host === requestUrl.host;
-  } catch {
-    return false;
+  const referer = request.headers.get('Referer');
+  if (referer) {
+    try {
+      const refererUrl = new URL(referer);
+      return refererUrl.host === requestUrl.host && refererUrl.protocol === requestUrl.protocol;
+    } catch {
+      return false;
+    }
   }
+
+  // Fail closed: Mutating request without either Origin or Referer is rejected
+  return false;
 }
 
 export function getClientIp(request: Request): string {
@@ -103,8 +112,17 @@ export function timingSafeEqual(a: string, b: string): boolean {
 }
 
 // -----------------------------------------------------------------------------
-// Cryptography & Session Tokens (HMAC-SHA256)
+// Cryptography & Session Tokens (HMAC-SHA256 Integrity Authentication)
 // -----------------------------------------------------------------------------
+
+function getValidSessionSecret(env: Env): string | null {
+  const secret = env.SESSION_SECRET;
+  if (!secret || typeof secret !== 'string') return null;
+  const trimmed = secret.trim();
+  // Require at least 16 characters of entropy for cryptographic HMAC keying
+  if (trimmed.length < 16) return null;
+  return trimmed;
+}
 
 async function getHmacKey(secret: string): Promise<CryptoKey> {
   const encoder = new TextEncoder();
@@ -133,9 +151,9 @@ function hexToBuf(hex: string): Uint8Array {
 }
 
 export async function createSessionToken(username: string, env: Env, ttlMs = 86400000): Promise<string> {
-  const secret = env.SESSION_SECRET || env.ADMIN_PASSWORD;
+  const secret = getValidSessionSecret(env);
   if (!secret) {
-    throw new Error('Authentication signing secret is missing; session token generation failed closed.');
+    throw new Error('SESSION_SECRET is missing or does not meet minimum security requirements; token issuance rejected.');
   }
   const key = await getHmacKey(secret);
   const expiresAt = Date.now() + ttlMs;
@@ -148,9 +166,9 @@ export async function createSessionToken(username: string, env: Env, ttlMs = 864
 export async function verifySessionToken(token: string | null | undefined, env: Env): Promise<{ valid: boolean; user?: string }> {
   if (!token) return { valid: false };
 
-  const secret = env.SESSION_SECRET || env.ADMIN_PASSWORD;
+  const secret = getValidSessionSecret(env);
   if (!secret) {
-    // Fail closed: without the server secret, no token can be legitimately verified
+    // Fail closed: without a valid, independent SESSION_SECRET, verification must fail
     return { valid: false };
   }
 

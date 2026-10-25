@@ -46,11 +46,14 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     return errorResponse('invalid', 'Password is required', 400);
   }
 
-  // Get admin password from environment variable
+  // Get admin password and session secret from environment variables
   const expectedPassword = env.ADMIN_PASSWORD;
   if (!expectedPassword) {
-    // If not set yet in Cloudflare Pages secrets, reject safely
     return errorResponse('unavailable', 'Admin credentials not configured in environment', 503);
+  }
+
+  if (!env.SESSION_SECRET || typeof env.SESSION_SECRET !== 'string' || env.SESSION_SECRET.trim().length < 16) {
+    return errorResponse('unavailable', 'Session secret not configured in environment', 503);
   }
 
   const matches = await constantTimeCompare(password, expectedPassword);
