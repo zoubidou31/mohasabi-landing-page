@@ -40,8 +40,10 @@ describe('Backend Security & Cryptographic Sessions', () => {
   it('rejects tampered session tokens (signature modification)', async () => {
     const token = await createSessionToken('admin', mockEnv, 3600000);
     const parts = token.split(':');
-    // Change last char of signature
-    const badSig = parts[2].slice(0, -2) + '00';
+    // Invert first character of signature to guarantee it differs from original
+    const firstChar = parts[2][0];
+    const invertedChar = firstChar === 'a' ? 'b' : 'a';
+    const badSig = invertedChar + parts[2].slice(1);
     const tampered = `${parts[0]}:${parts[1]}:${badSig}`;
 
     const check = await verifySessionToken(tampered, mockEnv);
