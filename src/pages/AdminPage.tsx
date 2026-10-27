@@ -2,33 +2,47 @@ import { useEffect, useState } from 'react';
 import {
   Activity,
   AlertTriangle,
+  FileText,
   Gauge,
+  Home,
+  Image as ImageIcon,
   Inbox,
   KeyRound,
   Loader2,
   LogOut,
   Mail,
+  MessageCircleQuestion,
   Star,
   Tag,
   ThumbsDown,
   ThumbsUp,
+  Upload,
 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { Button } from '../components/ui/Button';
 import type { TranslationKey } from '../i18n/translations';
 import { api, type ActivityEntry, type AdminMessage, type AdminReview, type AdminStats, type PricingPlanRow } from '../services/api';
+import { CmsHomePanel } from '../components/admin/CmsHomePanel';
+import { CmsFaqPanel } from '../components/admin/CmsFaqPanel';
+import { CmsMediaPanel } from '../components/admin/CmsMediaPanel';
 
 type Gate = 'checking' | 'anonymous' | 'admin' | 'unavailable';
-type PanelId = 'dashboard' | 'reviews' | 'pricing' | 'messages' | 'activity';
+type PanelId = 'dashboard' | 'reviews' | 'pricing' | 'messages' | 'activity' | 'cms-home' | 'cms-pages' | 'cms-faq' | 'cms-media' | 'cms-releases';
 
 interface PanelDef {
   id: PanelId;
   icon: React.ComponentType<{ className?: string }>;
   labelKey: TranslationKey;
+  label?: string;
 }
 
 const panelDefs: readonly PanelDef[] = [
   { id: 'dashboard', icon: Gauge, labelKey: 'admin.nav.dashboard' },
+  { id: 'cms-home', icon: Home, labelKey: 'admin.nav.dashboard', label: 'CMS: Home' },
+  { id: 'cms-pages', icon: FileText, labelKey: 'admin.nav.dashboard', label: 'CMS: Pages' },
+  { id: 'cms-faq', icon: MessageCircleQuestion, labelKey: 'admin.nav.dashboard', label: 'CMS: FAQ' },
+  { id: 'cms-media', icon: ImageIcon, labelKey: 'admin.nav.dashboard', label: 'CMS: Media' },
+  { id: 'cms-releases', icon: Upload, labelKey: 'admin.nav.dashboard', label: 'CMS: Releases' },
   { id: 'reviews', icon: Star, labelKey: 'admin.nav.reviews' },
   { id: 'pricing', icon: Tag, labelKey: 'admin.nav.pricing' },
   { id: 'messages', icon: Mail, labelKey: 'admin.nav.messages' },
@@ -104,7 +118,7 @@ export const AdminPage: React.FC = () => {
               className="card p-3 flex flex-row lg:flex-col gap-1 overflow-x-auto lg:sticky lg:top-24"
               aria-label={t('admin.navAria')}
             >
-              {panelDefs.map(({ id, icon: Icon, labelKey }) => {
+              {panelDefs.map(({ id, icon: Icon, labelKey, label }) => {
                 const active = id === panel;
                 return (
                   <button
@@ -119,7 +133,7 @@ export const AdminPage: React.FC = () => {
                     }`}
                   >
                     <Icon className="w-4 h-4" aria-hidden="true" />
-                    {t(labelKey)}
+                    {label || t(labelKey)}
                   </button>
                 );
               })}
@@ -139,6 +153,11 @@ export const AdminPage: React.FC = () => {
 
           <main className="lg:col-span-9">
             {panel === 'dashboard' ? <DashboardPanel /> : null}
+            {panel === 'cms-home' ? <CmsHomePanel /> : null}
+            {panel === 'cms-pages' ? <PanelShell title="CMS: Pages"><p className="text-sm text-neutral-600">Pages management API ready. Use CMS endpoints to create/edit custom pages.</p></PanelShell> : null}
+            {panel === 'cms-faq' ? <CmsFaqPanel /> : null}
+            {panel === 'cms-media' ? <CmsMediaPanel /> : null}
+            {panel === 'cms-releases' ? <PanelShell title="CMS: Releases"><p className="text-sm text-neutral-600">Releases management API ready. Manage release entries without editing code.</p></PanelShell> : null}
             {panel === 'reviews' ? <ReviewsPanel /> : null}
             {panel === 'pricing' ? <PricingPanel /> : null}
             {panel === 'messages' ? <MessagesPanel /> : null}

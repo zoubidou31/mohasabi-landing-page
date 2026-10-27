@@ -210,5 +210,77 @@ export const api = {
       }),
 
     activity: () => request<{ entries: ActivityEntry[] }>('/api/admin/activity'),
+    cms: {
+      home: {
+        get: () => request<any>('/api/admin/cms/home'),
+        put: (body: any) => request<{ ok: boolean; status: string; updatedAt: string }>('/api/admin/cms/home', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        }),
+      },
+      pages: {
+        get: () => request<any>('/api/admin/cms/pages'),
+        create: (body: any) => request<{ ok: boolean; id: string }>('/api/admin/cms/pages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        }),
+        update: (body: any) => request<{ ok: boolean }>('/api/admin/cms/pages', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        }),
+      },
+      faq: {
+        get: () => request<any>('/api/admin/cms/faq'),
+        create: (body: any) => request<{ ok: boolean; id: string }>('/api/admin/cms/faq', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        }),
+        update: (body: any) => request<{ ok: boolean }>('/api/admin/cms/faq', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        }),
+        delete: (id: string) => request<{ ok: boolean }>('/api/admin/cms/faq', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id }),
+        }),
+      },
+      media: {
+        get: () => request<any>('/api/admin/cms/media'),
+        upload: (formData: FormData) => request<{ ok: boolean; id: string; url: string }>('/api/admin/cms/media', {
+          method: 'POST',
+          body: formData,
+        }),
+        update: (body: any) => request<{ ok: boolean }>('/api/admin/cms/media', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        }),
+        delete: (id: string) => request<{ ok: boolean }>('/api/admin/cms/media', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id }),
+        }),
+      },
+      releases: {
+        get: () => request<any>('/api/admin/cms/releases'),
+        create: (body: any) => request<{ ok: boolean; id: string }>('/api/admin/cms/releases', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        }),
+        update: (body: any) => request<{ ok: boolean }>('/api/admin/cms/releases', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        }),
+      },
+      audit: () => request<any>('/api/admin/cms/audit'),
+    },
   },
 };
