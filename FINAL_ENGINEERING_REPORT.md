@@ -149,3 +149,4 @@ npx wrangler login
 npm run deploy:preview
 ```
 *(أو تعيين المتغير `CLOUDFLARE_API_TOKEN` في بيئة العمل لتفعيل النشر المؤتمت).*
+

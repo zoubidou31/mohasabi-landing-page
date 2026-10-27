@@ -1,162 +1,35 @@
-# Mohasabi — موقع الهبوط والتسويق الرسمي
+# Mohasabi
 
-الموقع التسويقي الرسمي لبرنامج المحاسبة وإدارة نقاط البيع **Mohasabi** (محاسبي)، المصمم خصيصاً للشركات الصغيرة والمتوسطة، المحلات التجارية، والموزعين.
+Official marketing website for **Mohasabi** — a desktop POS and accounting application for small and medium businesses.
 
-- **المستودع الرسمي:** `https://github.com/zoubidou31/mohasabi-landing-page`
-- **بيئة المعاينة (Preview):** `https://mohasabi-preview.pages.dev/`
-- **موقع الإنتاج المحمي:** `https://mohasabi.pages.dev/`
-- **مستودع الإصدارات المحمي:** `https://github.com/zoubidou31/mohasabi-releases`
+- **Website (Production):** [https://mohasabi.pages.dev/](https://mohasabi.pages.dev/)
+- **Preview:** [https://mohasabi-preview.pages.dev/](https://mohasabi-preview.pages.dev/)
+- **Official Releases:** [https://github.com/zoubidou31/mohasabi-releases](https://github.com/zoubidou31/mohasabi-releases)
+- **Repository:** [https://github.com/zoubidou31/mohasabi-landing-page](https://github.com/zoubidou31/mohasabi-landing-page)
 
----
+## Features
+- Marketing pages: Home, Pricing, Installation, Support, Reviews, Updates, Privacy, Terms
+- Arabic (RTL), French, English support
+- Pricing table (DZD) and official download links to verified releases
+- Secure contact channels
 
-## 1. خريطة الموقع الرسمية
+## Pricing (DZD)
+| Plan | 1 month | 3 months | 6 months | 12 months |
+| :--- | ---: | ---: | ---: | ---: |
+| Standard | 1,500 دج | 3,500 دج | 6,500 دج | 12,000 دج |
+| Pro | 3,000 دج | 7,500 دج | 13,500 دج | 25,000 دج |
+| Enterprise | 5,500 دج | 13,000 دج | 24,000 دج | 45,000 دج |
 
-المسارات المعتمدة في الموقع:
-1. `/` — **الصفحة الرئيسية:** المشاكل الواقعية، الميزات الست، طريقة العمل، أمان البيانات، تجربة عدم الاتصال، استعراض الأسعار.
-2. `/pricing` — **جدول الأسعار والتراخيص:** تفاصيل الخطط الثلاث والمدد الأربع وحاسبة السعر والتواصل لطلب الترخيص.
-3. `/installation` — **دليل التثبيت والتشغيل:** متطلبات التشغيل، خطوات التثبيت على Windows، وحقيقة تنبيه SmartScreen.
-4. `/support` — **الدعم والتواصل:** قنوات التواصل المباشرة (واتساب، بريد إلكتروني) ونموذج الدعم السحابي.
-5. `/reviews` — **آراء وتقييمات المستخدمين:** عرض المراجعات المعتمدة ونموذج إضافة تقييم جديد.
-6. `/updates` — **سجل التحديثات والإصدارات:** تفاصيل الإصدارات الرسمية، بصمات SHA-256، وروابط التنزيل المباشرة.
-7. `/admin` — **لوحة التحكم والإدارة:** محمية بكلمة مرور الخادم لإدارة الأسعار والمراجعات والرسائل وسجل التدقيق.
-8. `/privacy` و `/terms` — **السياسات والشروط:** سياسة الخصوصية المحلية (Local-First) وشروط الاستخدام.
-9. `*` — **صفحة 404 مخصصة:** صفحة خطأ احترافية تحتوي على روابط إرشادية واضحة للعودة.
+**Contact:** WhatsApp [+213674947157](https://wa.me/213674947157) · Email [mohzoubid@gmail.com](mailto:mohzoubid@gmail.com)
 
----
-
-## 2. جدول الأسعار الرسمي (بالدينار الجزائري DZD)
-
-| الخطة | شهر واحد | 3 أشهر | 6 أشهر | 12 شهراً |
-| :--- | :---: | :---: | :---: | :---: |
-| **Standard** | 1,500 دج | 3,500 دج | 6,500 دج | 12,000 دج |
-| **Pro** | 3,000 دج | 7,500 دج | 13,500 دج | 25,000 دج |
-| **Enterprise** | 5,500 دج | 13,000 دج | 24,000 دج | 45,000 دج |
-
-- **قنوات طلب التراخيص:**
-  - واتساب الدعم الفني: `+213674947157`
-  - البريد الإلكتروني الرسمي: `mohzoubid@gmail.com`
-
----
-
-## 3. الأمان والحماية البرمجية
-
-- **توثيق لوحة الإدارة:** جلسات مشفرة وموقعة برمز HMAC-SHA256 داخل كوكيز `HttpOnly; Secure; SameSite=Strict`.
-- **مقاومة هجمات التخمين (Brute Force):** تقييد عدد محاولات الدخول عبر فحص Rate Limiting.
-- **الحماية من هجمات CSRF:** التحقق الإلزامي من ترويسة المصدر (`Origin` و `Referer`) لكافة الطلبات المغيرة للحالة.
-- **حماية النماذج العامة من البوتات:** دمج حقول فخاخ البوتات (Honeypot) الخفية.
-- **ترويسات أمنية صارمة:** تطبيق CSP، HSTS، X-Content-Type-Options: nosniff، و X-Frame-Options: DENY.
-
----
-
-## 4. أوامر التطوير والتشغيل
-
+## Development
 ```bash
-# تثبيت الاعتماديات
 npm ci
-
-# تشغيل بيئة التطوير المحلية
 npm run dev
-
-# تشغيل جناح الاختبارات الآلية
+npm run lint
 npm run test:run
-
-# تشغيل الفحص الأمني وفحص الجودة المتكامل
-npm run qa:sec
-
-# بناء المشروع للإنتاج
 npm run build
-
-# معاينة البناء المحلي
-npm run preview
 ```
 
----
-
-## 5. هيكل المشروع المنظم
-
-```
-web-mohasabi/
-├── assets/                     # أصول الهوية الأصلية (الشعار الأصلي logo.png)
-├── functions/                  # Cloudflare Pages Functions
-│   ├── _middleware.ts          # وسيط ترويسات الأمان (Security Headers)
-│   └── api/
-│       ├── _shared.ts          # توثيق الجلسات بـ HMAC، التشفير، والحد من الطلبات
-│       ├── pricing.ts          # واجهة قراءة الأسعار العامة من D1
-│       ├── reviews.ts          # واجهة عرض وإرسال التقييمات
-│       ├── support.ts          # واجهة استلام طلبات الدعم
-│       ├── session.ts          # فحص جلسة المشرف
-│       ├── login.ts            # تسجيل دخول المشرف ومقاومة التخمين
-│       ├── logout.ts           # إنهاء الجلسة
-│       └── admin/              # واجهات لوحة الإدارة المحمية
-│           ├── stats.ts        # إحصائيات النظام
-│           ├── reviews/        # اعتماد أو رفض التقييمات
-│           ├── pricing.ts      # قراءة وتعديل الأسعار
-│           ├── messages/       # قراءة رسائل الدعم
-│           └── activity.ts     # سجل التدقيق (Audit Log)
-├── migrations/
-│   └── 0001_initial_schema.sql # مخطط قاعدة بيانات Cloudflare D1
-├── public/                     # الملفات الثابتة
-│   ├── _headers                # ترويسات CSP و HSTS والتخزين المؤقت
-│   ├── _redirects              # إعادة التوجيه 301 للمسارات السابقة
-│   ├── robots.txt              # قواعد محركات البحث
-│   └── sitemap.xml             # خريطة الموقع متعددة اللغات
-├── scripts/
-│   ├── qa-sec.sh               # سكربت التحقق الأمني وجودة الكود (Linux/macOS)
-│   └── qa-sec.js               # سكربت التحقق الأمني وجودة الكود (Node.js/Windows)
-├── src/
-│   ├── __tests__/              # اختبارات الجودة والأمان والتسعير
-│   ├── components/
-│   │   ├── layout/             # Header, Footer, Layout, SettingsMenu
-│   │   ├── sections/           # أقسام الصفحة الرئيسية والصفحات
-│   │   ├── ui/                 # الأزرار والترويسات
-│   │   └── icons/              # الأيقونات المخصصة
-│   ├── config/
-│   │   └── siteConfig.ts       # الإعدادات الموحدة والمصدر المعتمد للتسعير
-│   ├── content/
-│   │   └── releases.ts         # سجل الإصدارات الرسمية والبصمات
-│   ├── i18n/
-│   │   ├── translations.ts     # قواميس اللغات الثلاث (ar, fr, en)
-│   │   ├── LanguageContext.tsx # سياق اللغة وتوجيه RTL/LTR
-│   │   └── usePageTitle.ts     # إدارة عناوين الصفحات وSEO
-│   ├── pages/                  # الصفحات الأساسية
-│   ├── services/
-│   │   └── api.ts              # عميل التواصل مع الخادم ومعالجة الحالات
-│   ├── App.tsx                 # موجه التطبيق وتجزئة الحزم (Code Splitting)
-│   └── main.tsx                # مدخل التطبيق
-├── wrangler.toml               # إعدادات بيئة المعاينة وبيئة الإنتاج المحمية
-├── vite.config.ts              # إعدادات Vite وتجزئة الحزم Vendor
-└── package.json
-```
-
----
-
-## 6. إعدادات النشر وقاعدة البيانات على Cloudflare Pages
-
-### بيئة المعاينة (Preview):
-- **اسم المشروع:** `mohasabi-preview`
-- **الرابط:** `https://mohasabi-preview.pages.dev/`
-- **قاعدة البيانات (D1 Database):** `mohasabi-cms-preview`
-- **معرّف قاعدة البيانات (D1 Database ID):** `9d6590b6-7ac0-4dd5-a3b0-62321db906f4`
-- **اسم الربط (Binding):** `DB`
-- **الأسرار المضبوطة (Secrets):** `ADMIN_PASSWORD` و `SESSION_SECRET` (مشفرة في Cloudflare Pages).
-
-```bash
-# بناء المشروع
-npm run build
-
-# النشر على مشروع المعاينة
-npm run deploy:preview
-# أو مباشرة:
-npx wrangler pages deploy dist --project-name=mohasabi-preview
-```
-
-### حماية بيئة الإنتاج:
-- مشروع الإنتاج (`mohasabi.pages.dev`) مفصول تمامًا ومعزول عن بيئة المعاينة.
-- مستودع الإصدارات (`mohasabi-releases`) محمي ولا يتم النشر إليه أو تعديله عبر هذا المستودع.
-- لا يجوز النشر على بيئة الإنتاج إلا بموافقة صريحة من المالك وبعد التحقق الكامل من بيئة المعاينة.
-
----
-
-## 7. الترخيص وحقوق الملكية
-
-جميع الحقوق محفوظة لبرنامج **Mohasabi** © 2026.
+## License
+All rights reserved © 2026 Mohasabi.
