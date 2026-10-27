@@ -80,10 +80,7 @@ export const ReleaseCard: React.FC<{ release: ReleaseRecord; defaultExpanded?: b
         </div>
       </dl>
 
-      <div className="rounded-xl bg-neutral-50 border border-neutral-200 p-3.5 mb-6 text-xs font-mono text-neutral-700 break-all">
-        <span className="font-semibold text-neutral-500 block mb-1">SHA-256 Fingerprint:</span>
-        {release.sha256}
-      </div>
+      {/* SHA-256 fingerprint removed from public UI per owner request */}
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <Button href={release.downloadUrl} target="_blank" variant="primary">
